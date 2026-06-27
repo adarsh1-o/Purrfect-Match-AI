@@ -136,26 +136,137 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Welfare Metrics */}
+      {/* Welfare Mission Targets */}
       <div className="w-full max-w-7xl mx-auto mt-32 px-4 sm:px-6 lg:px-8 border-t border-neutral-900 pt-20">
+        <div className="text-center mb-12">
+          <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full border border-neutral-800 bg-neutral-950/60 text-[10px] font-mono text-neutral-400 mb-3">
+            <span>Our Core Mission Objectives</span>
+          </span>
+          <h2 className="text-2xl font-bold text-white tracking-wider">Aspirational Platform Targets</h2>
+          <p className="text-xs text-neutral-500 mt-2">Target objectives based on study benchmarks of behavioral matching databases.</p>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
           <div className="flex flex-col items-center">
             <Smile className="h-8 w-8 text-red-500 mb-3" />
             <span className="text-4xl font-extrabold text-white">99%</span>
-            <span className="text-xs font-semibold uppercase text-neutral-500 tracking-widest mt-1">Satisfaction Rate</span>
-            <p className="text-xs text-neutral-500 mt-2 max-w-xs">Highly matched human-cat relationships leading to happy homes.</p>
+            <span className="text-xs font-semibold uppercase text-neutral-500 tracking-widest mt-1">Target Match Compatibility</span>
+            <p className="text-xs text-neutral-500 mt-2 max-w-xs">Helping human-cat relations establish robust bonding profiles.</p>
           </div>
           <div className="flex flex-col items-center">
             <RefreshCw className="h-8 w-8 text-amber-500 mb-3" />
             <span className="text-4xl font-extrabold text-white">85%</span>
-            <span className="text-xs font-semibold uppercase text-neutral-500 tracking-widest mt-1">Return Reduction</span>
-            <p className="text-xs text-neutral-500 mt-2 max-w-xs">Drastically reduces failed shelter placements and cat stress.</p>
+            <span className="text-xs font-semibold uppercase text-neutral-500 tracking-widest mt-1">Targeted Return Drop</span>
+            <p className="text-xs text-neutral-500 mt-2 max-w-xs">Aims to decrease failed placements and pet re-homing stress.</p>
           </div>
           <div className="flex flex-col items-center">
             <BarChart2 className="h-8 w-8 text-blue-500 mb-3" />
-            <span className="text-4xl font-extrabold text-white">10k+</span>
-            <span className="text-xs font-semibold uppercase text-neutral-500 tracking-widest mt-1">Matched Companions</span>
-            <p className="text-xs text-neutral-500 mt-2 max-w-xs">Helping animal shelters across communities optimize placement.</p>
+            <span className="text-4xl font-extrabold text-white">100%</span>
+            <span className="text-xs font-semibold uppercase text-neutral-500 tracking-widest mt-1">Shelter Adoption Aid</span>
+            <p className="text-xs text-neutral-500 mt-2 max-w-xs">Open-source integration suite for community animal shelters globally.</p>
+          </div>
+        </div>
+      </div>
+
+      {/* How It Works */}
+      <div className="w-full max-w-7xl mx-auto mt-32 px-4 sm:px-6 lg:px-8 border-t border-neutral-900 pt-20 animate-fade-in">
+        <div className="text-center mb-12">
+          <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full border border-neutral-800 bg-neutral-950/60 text-[10px] font-mono text-neutral-400 mb-3">
+            <span>Seamless Bonding Journey</span>
+          </span>
+          <h2 className="text-2xl font-bold text-white tracking-wider">How Purrfect Match AI Works</h2>
+          <p className="text-xs text-neutral-500 mt-2">Three straightforward stages to find and build a perfect companion relationship.</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="glass-card rounded-2xl border border-neutral-800 p-6 flex flex-col justify-between">
+            <div>
+              <span className="text-xs font-bold text-red-500 uppercase tracking-wider font-mono">Stage 01</span>
+              <h3 className="text-lg font-bold text-white mt-2">Take Compatibility Test</h3>
+              <p className="text-xs text-neutral-400 mt-2 leading-relaxed">
+                Answer lifestyle, household environment, and personality preferences questions. We use this to compute a live compatibility score for all shelter cats.
+              </p>
+            </div>
+            <Link
+              href="/questionnaire"
+              className="mt-6 inline-flex items-center justify-center py-2 px-4 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg text-xs transition-colors cursor-pointer"
+            >
+              Start Compatibility Test
+            </Link>
+          </div>
+
+          <div className="glass-card rounded-2xl border border-neutral-800 p-6 flex flex-col justify-between">
+            <div>
+              <span className="text-xs font-bold text-amber-500 uppercase tracking-wider font-mono">Stage 02</span>
+              <h3 className="text-lg font-bold text-white mt-2">Browse Matches & Register</h3>
+              <p className="text-xs text-neutral-400 mt-2 leading-relaxed">
+                Filter and match cats currently housed in community shelters, or register your own existing pet to initialize their behavioral records.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-2 mt-6">
+              <Link
+                href="/browse"
+                className="py-2 px-3 bg-neutral-900 border border-neutral-850 hover:bg-neutral-800 text-neutral-200 hover:text-white font-bold rounded-lg text-[10px] text-center transition-colors cursor-pointer"
+              >
+                Browse Cats
+              </Link>
+              <Link
+                href="/profile"
+                className="py-2 px-3 bg-neutral-900 border border-neutral-850 hover:bg-neutral-800 text-neutral-200 hover:text-white font-bold rounded-lg text-[10px] text-center transition-colors cursor-pointer"
+              >
+                Register Pet
+              </Link>
+            </div>
+          </div>
+
+          <div className="glass-card rounded-2xl border border-neutral-800 p-6 flex flex-col justify-between">
+            <div>
+              <span className="text-xs font-bold text-emerald-500 uppercase tracking-wider font-mono">Stage 03</span>
+              <h3 className="text-lg font-bold text-white mt-2">Analyze Behavior via AI</h3>
+              <p className="text-xs text-neutral-400 mt-2 leading-relaxed">
+                Upload video or image captures of your pet's postures and expressions to run our diagnostic classification model and read immediate care instructions.
+              </p>
+            </div>
+            <Link
+              href="/behaviour"
+              className="mt-6 inline-flex items-center justify-center py-2 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs transition-colors cursor-pointer"
+            >
+              Analyze Behavior
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Core AI Capabilities */}
+      <div className="w-full max-w-7xl mx-auto mt-32 mb-16 px-4 sm:px-6 lg:px-8 border-t border-neutral-900 pt-20">
+        <div className="text-center mb-12">
+          <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full border border-neutral-800 bg-neutral-950/60 text-[10px] font-mono text-neutral-400 mb-3">
+            <span>Platform Core Engine</span>
+          </span>
+          <h2 className="text-2xl font-bold text-white tracking-wider">Advanced AI Engine Capabilities</h2>
+          <p className="text-xs text-neutral-500 mt-2">Underneath the hood of our pet-human bonding intelligence framework.</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="p-6 rounded-2xl border border-neutral-900 bg-neutral-950/40 space-y-3">
+            <div className="inline-flex h-8 w-8 items-center justify-center rounded bg-red-950/20 text-red-500 border border-red-500/10 text-xs font-bold font-mono">01</div>
+            <h4 className="text-md font-bold text-white">Dynamic Compatibility Engine</h4>
+            <p className="text-xs text-neutral-400 leading-relaxed">
+              Maps multi-dimensional profiles covering activity requirements, social friendliness, and household size constraints using custom distance matching vectors.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-2xl border border-neutral-900 bg-neutral-950/40 space-y-3">
+            <div className="inline-flex h-8 w-8 items-center justify-center rounded bg-amber-955/20 text-amber-500 border border-amber-500/10 text-xs font-bold font-mono">02</div>
+            <h4 className="text-md font-bold text-white">Computer Vision Bounding-Boxes</h4>
+            <p className="text-xs text-neutral-400 leading-relaxed">
+              Locates postures, ear-flattening levels, and tail positions using bounding-box segmentation contour algorithms to classify cat mood structures.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-2xl border border-neutral-900 bg-neutral-950/40 space-y-3">
+            <div className="inline-flex h-8 w-8 items-center justify-center rounded bg-emerald-955/20 text-emerald-500 border border-emerald-500/10 text-xs font-bold font-mono">03</div>
+            <h4 className="text-md font-bold text-white">Lifecycle Profile Ledger</h4>
+            <p className="text-xs text-neutral-400 leading-relaxed">
+              Preserves chronological medical status entries, ownership transfer logs, and diagnostic history to guarantee seamless care handovers.
+            </p>
           </div>
         </div>
       </div>
