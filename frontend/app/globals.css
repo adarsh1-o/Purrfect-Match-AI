@@ -74,86 +74,86 @@ body {
 
 /* --- LIGHT MODE THEME OVERRIDES --- */
 .light {
-  --background: #f8f9fa;
-  --foreground: #0f172a;
-  --primary-glow: radial-gradient(rgba(239, 68, 68, 0.08), rgba(0, 0, 0, 0));
+  --background: #f7f1eb; /* Soft Warm Nude */
+  --foreground: #3d2d2a; /* Warm Espresso/Brown */
+  --primary-glow: radial-gradient(rgba(239, 68, 68, 0.06), rgba(0, 0, 0, 0));
 }
 
 .light body {
-  background-color: #f8f9fa;
-  color: #0f172a;
+  background-color: #f7f1eb;
+  color: #3d2d2a;
 }
 
 .light .glass-card {
-  background: rgba(255, 255, 255, 0.8);
-  border-color: #e2e8f0;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.75);
+  border-color: #e5d8cd;
+  box-shadow: 0 10px 30px -10px rgba(74, 50, 40, 0.05);
 }
 
 .light .glass-card-hover:hover {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: rgba(239, 68, 68, 0.25);
-  box-shadow: 0 20px 40px -15px rgba(239, 68, 68, 0.1);
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(239, 68, 68, 0.2);
+  box-shadow: 0 20px 40px -15px rgba(239, 68, 68, 0.07);
 }
 
 /* Neutral Typography and Contrast Fixes */
 .light h1, .light h2, .light h3, .light h4, .light h5, .light h6,
 .light .text-white, .light .font-bold.text-white {
-  color: #0f172a !important;
+  color: #3d2d2a !important;
 }
 
 .light p, .light .text-neutral-300, .light .text-neutral-400 {
-  color: #334155 !important;
+  color: #5c4d4a !important;
 }
 
 .light span, .light .text-neutral-500 {
-  color: #64748b !important;
+  color: #8c7975 !important;
 }
 
 .light input, .light select, .light textarea {
   background-color: #ffffff !important;
-  border-color: #cbd5e1 !important;
-  color: #0f172a !important;
+  border-color: #d8c9bc !important;
+  color: #3d2d2a !important;
 }
 
 .light input::placeholder, .light textarea::placeholder {
-  color: #94a3b8 !important;
+  color: #b5a499 !important;
 }
 
 .light .bg-neutral-900 {
-  background-color: #e2e8f0 !important;
+  background-color: #e8dcd0 !important;
 }
 
 .light .bg-neutral-950 {
-  background-color: #f1f5f9 !important;
+  background-color: #efe5dc !important;
 }
 
 .light .bg-neutral-950\/60 {
-  background-color: rgba(241, 245, 249, 0.7) !important;
+  background-color: rgba(239, 229, 220, 0.7) !important;
 }
 
 .light .bg-neutral-950\/80 {
-  background-color: rgba(248, 249, 250, 0.85) !important;
+  background-color: rgba(247, 241, 235, 0.85) !important;
 }
 
 .light .bg-neutral-950\/20 {
-  background-color: rgba(241, 245, 249, 0.25) !important;
+  background-color: rgba(239, 229, 220, 0.25) !important;
 }
 
 .light .border-neutral-800, .light .border-neutral-900, .light .border-neutral-850 {
-  border-color: #e2e8f0 !important;
+  border-color: #e8dcd0 !important;
 }
 
 .light .border-neutral-855 {
-  border-color: #cbd5e1 !important;
+  border-color: #d8c9bc !important;
 }
 
 .light header {
-  background-color: rgba(248, 249, 250, 0.8) !important;
-  border-color: #e2e8f0 !important;
+  background-color: rgba(247, 241, 235, 0.8) !important;
+  border-color: #e8dcd0 !important;
 }
 
 .light .text-neutral-200 {
-  color: #1e293b !important;
+  color: #4a3b37 !important;
 }
 
