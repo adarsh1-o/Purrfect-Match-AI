@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --primary-glow: radial-gradient(rgba(239, 68, 68, 0.15), rgba(0, 0, 0, 0));
+}
+
+body {
+  background-color: #050505;
+  color: #ededed;
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom Glow Effects */
+.glow-bg {
+  position: absolute;
+  top: -10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 1200px;
+  height: 600px;
+  background: var(--primary-glow);
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Glassmorphism Cards */
+.glass-card {
+  background: rgba(15, 15, 15, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px border-neutral-800;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glass-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card-hover:hover {
+  background: rgba(20, 20, 20, 0.85);
+  border-color: rgba(239, 68, 68, 0.3);
+  box-shadow: 0 12px 40px 0 rgba(239, 68, 68, 0.08);
+  transform: translateY(-2px);
+}
+
+/* Interactive custom radar chart coordinates helper */
+.radar-grid {
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 1;
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #070707;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1c1c1c;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2b2b2b;
+}
+
+/* --- LIGHT MODE THEME OVERRIDES --- */
+.light {
+  --background: #f8f9fa;
+  --foreground: #0f172a;
+  --primary-glow: radial-gradient(rgba(239, 68, 68, 0.08), rgba(0, 0, 0, 0));
+}
+
+.light body {
+  background-color: #f8f9fa;
+  color: #0f172a;
+}
+
+.light .glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: #e2e8f0;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+}
+
+.light .glass-card-hover:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(239, 68, 68, 0.25);
+  box-shadow: 0 20px 40px -15px rgba(239, 68, 68, 0.1);
+}
+
+/* Neutral Typography and Contrast Fixes */
+.light h1, .light h2, .light h3, .light h4, .light h5, .light h6,
+.light .text-white, .light .font-bold.text-white {
+  color: #0f172a !important;
+}
+
+.light p, .light .text-neutral-300, .light .text-neutral-400 {
+  color: #334155 !important;
+}
+
+.light span, .light .text-neutral-500 {
+  color: #64748b !important;
+}
+
+.light input, .light select, .light textarea {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+.light input::placeholder, .light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+.light .bg-neutral-900 {
+  background-color: #e2e8f0 !important;
+}
+
+.light .bg-neutral-950 {
+  background-color: #f1f5f9 !important;
+}
+
+.light .bg-neutral-950\/60 {
+  background-color: rgba(241, 245, 249, 0.7) !important;
+}
+
+.light .bg-neutral-950\/80 {
+  background-color: rgba(248, 249, 250, 0.85) !important;
+}
+
+.light .bg-neutral-950\/20 {
+  background-color: rgba(241, 245, 249, 0.25) !important;
+}
+
+.light .border-neutral-800, .light .border-neutral-900, .light .border-neutral-850 {
+  border-color: #e2e8f0 !important;
+}
+
+.light .border-neutral-855 {
+  border-color: #cbd5e1 !important;
+}
+
+.light header {
+  background-color: rgba(248, 249, 250, 0.8) !important;
+  border-color: #e2e8f0 !important;
+}
+
+.light .text-neutral-200 {
+  color: #1e293b !important;
+}
+
