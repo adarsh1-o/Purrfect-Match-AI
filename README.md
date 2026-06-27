@@ -87,10 +87,10 @@ Purrfect Match AI shifts the focus from **appearance to compatibility** and expa
                             [Behaviour Logs]
 ```
 
-- **`users`**: `id` (PK), `name`, `email`, `role` (adopter/shelter/admin), `created_at`
-- **`cats`**: `id` (PK), `name`, `age`, `breed`, `gender`, `description`, `image_url`, `shelter_id`, `status` (available/pending/adopted)
+- **`users`**: `id` (PK), `name`, `email`, `role` (adopter/shelter/admin), `address`, `phone`, `created_at`
+- **`cats`**: `id` (PK), `name`, `age`, `breed`, `gender`, `description`, `image_url`, `shelter_id`, `owner_id` (FK), `status` (available/passed_away/transferred/active)
 - **`personality_profiles`**: `cat_id` (PK, FK), `playfulness`, `curiosity`, `energy`, `confidence`, `friendliness`, `independence`, `explanation`
-- **`questionnaires`**: `user_id` (PK, FK), `house_type`, `kids` (bool), `other_pets` (bool), `experience` (beginner/expert), `working_hours`, `preferred_traits`
+- **`questionnaires`**: `user_id` (PK, FK), `house_type`, `kids` (bool), `other_pets` (bool), `experience`, `working_hours`, `preferred_traits`, `play_budget`, `vocal_tolerance`, `grooming_preference`, `ideal_description`
 - **`matches`**: `user_id` (PK, FK), `cat_id` (PK, FK), `compatibility` (float), `reasons`
 - **`behaviour_logs`**: `id` (PK), `cat_id` (FK), `user_id` (FK), `media_url`, `media_type`, `detected_behaviour`, `analysis`, `recommendations`, `timestamp`
 
@@ -101,16 +101,22 @@ Purrfect Match AI shifts the focus from **appearance to compatibility** and expa
 | Method | Endpoint | Description | Auth Required |
 | :--- | :--- | :--- | :--- |
 | **POST** | `/auth/signup` | Register a new adopter, shelter, or admin user. | No |
-| **POST** | `/auth/login` | Simple login using email. | No |
-| **GET** | `/cats/` | List all available cats with automatic compatibility scores. | Adopter Header |
-| **GET** | `/cats/{id}` | Retrieve single cat profile and detailed personality traits. | Adopter Header |
-| **POST** | `/cats/` | Register a new cat (Restricted to Shelter/Admin). | Shelter Header |
-| **POST** | `/questionnaire` | Submit lifestyle profile questionnaire. | Adopter Header |
-| **GET** | `/results` | Fetch top compatibility matches sorted by match rating. | Adopter Header |
-| **POST** | `/adoption-request` | File an application to adopt a companion. | Adopter Header |
-| **POST** | `/adoption-request/{id}/status`| Approve or reject pending applications. | Shelter Header |
-| **POST** | `/behaviour-analysis` | Upload video/image to perform behavior and mood parsing. | Any Auth Header |
-| **GET** | `/dashboard` | Retrieve consolidated role-based dashboard metrics. | Any Auth Header |
+| **POST** | `/auth/login` | Simple login using email and password context. | No |
+| **GET** | `/cats/` | List all available cats with automatic compatibility scores. | Yes |
+| **GET** | `/cats/{id}` | Retrieve single cat profile and detailed personality traits. | Yes |
+| **POST** | `/cats/` | Register a new cat with image upload (Restricted to Shelter/Admin). | Yes |
+| **DELETE** | `/cats/{id}` | Delete a cat profile (Restricted to registering Shelter/Admin). | Yes |
+| **POST** | `/questionnaire` | Submit or update single-page questionnaire parameters. | Yes |
+| **GET** | `/results` | Fetch top compatibility matches sorted by match rating. | Yes |
+| **POST** | `/adoption-request` | File an application to adopt a companion. | Yes |
+| **POST** | `/adoption-request/{id}/status`| Approve or reject pending applications. | Yes |
+| **POST** | `/behaviour-analysis` | Upload video/image to perform behavior and mood parsing. | Yes |
+| **GET** | `/users/profile` | Retrieve the authenticated user's profile details. | Yes |
+| **PUT** | `/users/profile` | Update user name, address, and phone numbers. | Yes |
+| **POST** | `/users/pets` | Register a personal custom pet with image upload. | Yes |
+| **POST** | `/users/pets/{id}/status` | Update custom pet status (e.g. mark passed away). | Yes |
+| **POST** | `/users/pets/{id}/transfer` | Transfer custom pet ownership to another user's email. | Yes |
+| **GET** | `/dashboard` | Retrieve consolidated role-based dashboard metrics. | Yes |
 
 ---
 
