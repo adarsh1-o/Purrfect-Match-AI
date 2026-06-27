@@ -44,7 +44,7 @@ export default function ProfilePage() {
   const [petBreed, setPetBreed] = useState("");
   const [petGender, setPetGender] = useState("female");
   const [petDescription, setPetDescription] = useState("");
-  const [petImageUrl, setPetImageUrl] = useState("");
+  const [petImageFile, setPetImageFile] = useState<File | null>(null);
   const [registeringPet, setRegisteringPet] = useState(false);
 
   // Ownership Transfer Inputs
@@ -86,27 +86,28 @@ export default function ProfilePage() {
 
   const handleRegisterPet = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!petName || !petAge || !petBreed || !petDescription) {
-      alert("Please fill in all required fields.");
+    if (!petName || !petAge || !petBreed || !petDescription || !petImageFile) {
+      alert("Please fill in all required fields (including the cat picture file).");
       return;
     }
     setRegisteringPet(true);
     try {
-      await registerCustomPet({
-        name: petName,
-        age: Number(petAge),
-        breed: petBreed,
-        gender: petGender,
-        description: petDescription,
-        image_url: petImageUrl || "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=400"
-      });
+      const formData = new FormData();
+      formData.append("name", petName);
+      formData.append("age", petAge);
+      formData.append("breed", petBreed);
+      formData.append("gender", petGender);
+      formData.append("description", petDescription);
+      formData.append("file", petImageFile);
+
+      await registerCustomPet(formData);
       alert("Pet registered successfully! You can now analyze their behavior.");
       setPetName("");
       setPetAge("");
       setPetBreed("");
       setPetGender("female");
       setPetDescription("");
-      setPetImageUrl("");
+      setPetImageFile(null);
       loadProfile();
     } catch (err: any) {
       alert(err.message || "Pet registration failed.");
@@ -441,14 +442,18 @@ export default function ProfilePage() {
 
                   <div>
                     <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">
-                      Cat Picture URL
+                      Upload Cat Image File
                     </label>
                     <input
-                      type="text"
-                      value={petImageUrl}
-                      onChange={(e) => setPetImageUrl(e.target.value)}
-                      placeholder="https://images.unsplash.com/..."
-                      className="w-full py-2 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none"
+                      type="file"
+                      required
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files.length > 0) {
+                          setPetImageFile(e.target.files[0]);
+                        }
+                      }}
+                      className="w-full py-2 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-400 file:mr-3 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-neutral-900 file:text-white hover:file:bg-neutral-850 cursor-pointer focus:outline-none"
                     />
                   </div>
 

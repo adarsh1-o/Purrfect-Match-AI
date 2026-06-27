@@ -190,22 +190,20 @@ export async function fetchBehaviourLogs(catId: string) {
   return res.json();
 }
 
-export async function registerCat(catData: {
-  name: string;
-  age: number;
-  breed: string;
-  gender: string;
-  description: string;
-  image_url: string;
-}) {
+export async function registerCat(formData: FormData) {
+  const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+  const headers: HeadersInit = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   const res = await fetch(`${API_BASE_URL}/cats/`, {
     method: "POST",
-    headers: getHeaders(),
-    body: JSON.stringify(catData),
+    headers,
+    body: formData,
   });
   if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.detail || "Failed to register new cat");
+    await throwApiError(res, "Failed to register new cat");
   }
   return res.json();
 }
@@ -232,18 +230,17 @@ export async function updateUserProfile(data: { name: string; address?: string; 
   return res.json();
 }
 
-export async function registerCustomPet(data: {
-  name: string;
-  age: number;
-  breed: string;
-  gender: string;
-  description?: string;
-  image_url?: string;
-}) {
+export async function registerCustomPet(formData: FormData) {
+  const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+  const headers: HeadersInit = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   const res = await fetch(`${API_BASE_URL}/users/pets`, {
     method: "POST",
-    headers: getHeaders(),
-    body: JSON.stringify(data),
+    headers,
+    body: formData,
   });
   if (!res.ok) {
     await throwApiError(res, "Failed to register custom pet");

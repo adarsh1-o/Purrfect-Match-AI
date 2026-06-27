@@ -22,6 +22,12 @@ app = FastAPI(
 
 # Configure CORS Middleware
 # Allows requests from Next.js frontend running locally or in production
+import os
+from fastapi.staticfiles import StaticFiles
+
+# Ensure static uploads directories exist
+os.makedirs("static/uploads", exist_ok=True)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Restrict to specific domains in production
@@ -29,6 +35,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Global Exception Handlers
 @app.exception_handler(Exception)

@@ -15,7 +15,7 @@ export default function ShelterDashboard() {
   const [breed, setBreed] = useState("");
   const [gender, setGender] = useState("female");
   const [description, setDescription] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [registering, setRegistering] = useState(false);
 
   const loadShelterData = async () => {
@@ -38,28 +38,29 @@ export default function ShelterDashboard() {
 
   const handleRegisterCat = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !age || !breed || !gender || !description || !imageUrl) {
+    if (!name || !age || !breed || !gender || !description || !imageFile) {
       alert("Please fill in all fields.");
       return;
     }
 
     setRegistering(true);
     try {
-      await registerCat({
-        name,
-        age: Number(age),
-        breed,
-        gender,
-        description,
-        image_url: imageUrl,
-      });
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("age", age);
+      formData.append("breed", breed);
+      formData.append("gender", gender);
+      formData.append("description", description);
+      formData.append("file", imageFile);
+
+      await registerCat(formData);
       // Reset form
       setName("");
       setAge("");
       setBreed("");
       setGender("female");
       setDescription("");
-      setImageUrl("");
+      setImageFile(null);
       // Reload lists
       loadShelterData();
       alert("Cat successfully registered! Default personality indexes loaded.");
@@ -192,14 +193,17 @@ export default function ShelterDashboard() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">Cat Photo Image URL</label>
+                <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">Upload Cat Image File</label>
                 <input
-                  type="text"
+                  type="file"
                   required
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  className="w-full py-2 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none"
-                  placeholder="https://images.unsplash.com/..."
+                  accept="image/*"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      setImageFile(e.target.files[0]);
+                    }
+                  }}
+                  className="w-full py-2 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-400 file:mr-3 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-neutral-900 file:text-white hover:file:bg-neutral-850 cursor-pointer focus:outline-none"
                 />
               </div>
 

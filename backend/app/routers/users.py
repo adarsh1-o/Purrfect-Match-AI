@@ -1,10 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Form, File, UploadFile
 from sqlalchemy.orm import Session
 from backend.app.database.connection import get_db
 from backend.app.models.models import User, Cat, PersonalityProfile
 from backend.app.routers.auth import get_current_user
-from backend.app.schemas.schemas import UserProfileUpdate, PetCreate, PetStatusUpdate, PetTransfer
+from backend.app.schemas.schemas import UserProfileUpdate, PetStatusUpdate, PetTransfer
 from typing import List
+import shutil
+import uuid
+import os
 
 router = APIRouter(prefix="/users", tags=["User Profiles"])
 
@@ -54,18 +57,31 @@ def update_profile(
 
 @router.post("/pets", response_model=dict)
 def add_custom_pet(
-    pet_data: PetCreate,
+    name: str = Form(...),
+    age: int = Form(...),
+    breed: str = Form(...),
+    gender: str = Form(...),
+    description: str = Form(...),
+    file: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Registers a personal pet cat owned directly by the adopter/user."""
+    # Save uploaded file
+    filename = f"{uuid.uuid4()}_{file.filename}"
+    file_path = f"static/uploads/{filename}"
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    image_url = f"http://localhost:8000/static/uploads/{filename}"
+
     new_cat = Cat(
-        name=pet_data.name,
-        age=pet_data.age,
-        breed=pet_data.breed,
-        gender=pet_data.gender.lower(),
-        description=pet_data.description,
-        image_url=pet_data.image_url,
+        name=name,
+        age=age,
+        breed=breed,
+        gender=gender.lower(),
+        description=description,
+        image_url=image_url,
         owner_id=current_user.id,
         status="active"
     )
