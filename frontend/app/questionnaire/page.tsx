@@ -20,6 +20,14 @@ export default function CompatibilityQuestionnaire() {
   const [workingHoursRange, setWorkingHoursRange] = useState("8"); // maps to numeric hours
   const [playBudget, setPlayBudget] = useState("active");
 
+  // Other Write-in States
+  const [houseTypeOther, setHouseTypeOther] = useState("");
+  const [experienceOther, setExperienceOther] = useState("");
+  const [vocalToleranceOther, setVocalToleranceOther] = useState("");
+  const [groomingPreferenceOther, setGroomingPreferenceOther] = useState("");
+  const [playBudgetOther, setPlayBudgetOther] = useState("");
+  const [workingHoursOther, setWorkingHoursOther] = useState("");
+
   // Checkboxes
   const [kids, setKids] = useState(false);
   const [otherPets, setOtherPets] = useState(false);
@@ -40,17 +48,31 @@ export default function CompatibilityQuestionnaire() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+
+    const finalHouseType = houseType === "other" ? houseTypeOther : houseType;
+    const finalExperience = experience === "other" ? experienceOther : experience;
+    const finalVocalTolerance = vocalTolerance === "other" ? vocalToleranceOther : vocalTolerance;
+    const finalGroomingPreference = groomingPreference === "other" ? groomingPreferenceOther : groomingPreference;
+    const finalPlayBudget = playBudget === "other" ? playBudgetOther : playBudget;
+    
+    let finalWorkingHours = 8;
+    if (workingHoursRange === "other") {
+      finalWorkingHours = Number(workingHoursOther) || 8;
+    } else {
+      finalWorkingHours = Number(workingHoursRange);
+    }
+
     try {
       await submitQuestionnaire({
-        house_type: houseType,
+        house_type: finalHouseType || "apartment",
         kids,
         other_pets: otherPets,
-        experience,
-        working_hours: Number(workingHoursRange),
+        experience: finalExperience || "beginner",
+        working_hours: finalWorkingHours,
         preferred_traits: selectedTraits.join(","),
-        play_budget: playBudget,
-        vocal_tolerance: vocalTolerance,
-        grooming_preference: groomingPreference,
+        play_budget: finalPlayBudget || "active",
+        vocal_tolerance: finalVocalTolerance || "any",
+        grooming_preference: finalGroomingPreference || "any",
         ideal_description: idealDescription
       });
       // Redirect to match scanning animation
@@ -95,9 +117,24 @@ export default function CompatibilityQuestionnaire() {
                 className="w-full py-2 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
               >
                 <option value="apartment">Apartment</option>
-                <option value="house">House (Spacious)</option>
-                <option value="studio">Studio (Compact)</option>
+                <option value="house">Spacious House</option>
+                <option value="studio">Compact Studio</option>
+                <option value="duplex">Duplex / Split-level</option>
+                <option value="townhouse">Townhouse</option>
+                <option value="condo">Condominium</option>
+                <option value="farm">Farm / Rural Property</option>
+                <option value="other">Other (Please specify)</option>
               </select>
+              {houseType === "other" && (
+                <input
+                  type="text"
+                  required
+                  placeholder="Type your living space type..."
+                  value={houseTypeOther}
+                  onChange={(e) => setHouseTypeOther(e.target.value)}
+                  className="w-full mt-2 py-2 px-3 bg-neutral-950 border border-red-500/40 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
+                />
+              )}
             </div>
 
             <div>
@@ -110,9 +147,22 @@ export default function CompatibilityQuestionnaire() {
                 className="w-full py-2 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
               >
                 <option value="beginner">Beginner (First-time owner)</option>
-                <option value="intermediate">Intermediate (Had pets before)</option>
-                <option value="expert">Expert (Experienced handler)</option>
+                <option value="grew_up">Grew up with cats (Some family experience)</option>
+                <option value="intermediate">Intermediate (Owned 1-2 cats previously)</option>
+                <option value="multicat">Multi-cat household owner (High experience)</option>
+                <option value="expert">Expert / Rescuer / Professional breeder</option>
+                <option value="other">Other (Please specify)</option>
               </select>
+              {experience === "other" && (
+                <input
+                  type="text"
+                  required
+                  placeholder="Type your experience profile..."
+                  value={experienceOther}
+                  onChange={(e) => setExperienceOther(e.target.value)}
+                  className="w-full mt-2 py-2 px-3 bg-neutral-950 border border-red-500/40 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
+                />
+              )}
             </div>
           </div>
 
@@ -161,11 +211,25 @@ export default function CompatibilityQuestionnaire() {
                 onChange={(e) => setWorkingHoursRange(e.target.value)}
                 className="w-full py-2 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
               >
-                <option value="0">Home Constantly (0 hours)</option>
-                <option value="3">Short Absences (1-4 hours)</option>
-                <option value="8">Full Workday (5-8 hours)</option>
-                <option value="12">Long Absences (9+ hours)</option>
+                <option value="0">Mostly present (Work from home / 0 hours)</option>
+                <option value="3">Part-time away (2-4 hours)</option>
+                <option value="8">Full-time shift (5-8 hours)</option>
+                <option value="10">Extended workday (9-10 hours)</option>
+                <option value="12">Frequent traveler (11-12 hours)</option>
+                <option value="other">Other (Type custom hours)</option>
               </select>
+              {workingHoursRange === "other" && (
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  max="24"
+                  placeholder="Type hours away per day..."
+                  value={workingHoursOther}
+                  onChange={(e) => setWorkingHoursOther(e.target.value)}
+                  className="w-full mt-2 py-2 px-3 bg-neutral-950 border border-red-500/40 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
+                />
+              )}
             </div>
 
             <div>
@@ -177,10 +241,22 @@ export default function CompatibilityQuestionnaire() {
                 onChange={(e) => setPlayBudget(e.target.value)}
                 className="w-full py-2 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
               >
-                <option value="quick">Quick Interaction (&lt;30 min/day)</option>
+                <option value="quick">Quick Interaction (&lt;15 min/day)</option>
+                <option value="short">Short playtime (15-30 min/day)</option>
                 <option value="active">Active Playtime (30-60 min/day)</option>
                 <option value="extensive">Extensive Engagement (1-2 hours/day)</option>
+                <option value="other">Other (Please specify)</option>
               </select>
+              {playBudget === "other" && (
+                <input
+                  type="text"
+                  required
+                  placeholder="Type your daily play commitment..."
+                  value={playBudgetOther}
+                  onChange={(e) => setPlayBudgetOther(e.target.value)}
+                  className="w-full mt-2 py-2 px-3 bg-neutral-950 border border-red-500/40 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
+                />
+              )}
             </div>
           </div>
         </div>
@@ -202,9 +278,21 @@ export default function CompatibilityQuestionnaire() {
                 className="w-full py-2 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
               >
                 <option value="any">No Preference (Open to vocal or silent)</option>
-                <option value="silent">Quiet & Silent (Minimal vocal cues)</option>
-                <option value="talkative">Communicative & Vocal (Siamese mix behavior)</option>
+                <option value="silent">Completely quiet & silent (Minimal vocal cues)</option>
+                <option value="soft">Soft chirping / Occasional meows</option>
+                <option value="talkative">Highly talkative & interactive (Siamese behavior)</option>
+                <option value="other">Other (Please specify)</option>
               </select>
+              {vocalTolerance === "other" && (
+                <input
+                  type="text"
+                  required
+                  placeholder="Type your vocalization preferences..."
+                  value={vocalToleranceOther}
+                  onChange={(e) => setVocalToleranceOther(e.target.value)}
+                  className="w-full mt-2 py-2 px-3 bg-neutral-950 border border-red-500/40 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
+                />
+              )}
             </div>
 
             <div>
@@ -217,9 +305,21 @@ export default function CompatibilityQuestionnaire() {
                 className="w-full py-2 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
               >
                 <option value="any">No Preference (Open to any coat length)</option>
-                <option value="low_maintenance">Low Maintenance (Shorthair, minimal brushing)</option>
-                <option value="comfortable_daily">Comfortable with Daily Brushing (Longhair styles)</option>
+                <option value="zero">Zero grooming (Shorthair / Hypoallergenic)</option>
+                <option value="weekly">Occasional brushing (Weekly routine)</option>
+                <option value="comfortable_daily">High maintenance (Comfortable with daily brushing)</option>
+                <option value="other">Other (Please specify)</option>
               </select>
+              {groomingPreference === "other" && (
+                <input
+                  type="text"
+                  required
+                  placeholder="Type your coat grooming preferences..."
+                  value={groomingPreferenceOther}
+                  onChange={(e) => setGroomingPreferenceOther(e.target.value)}
+                  className="w-full mt-2 py-2 px-3 bg-neutral-950 border border-red-500/40 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
+                />
+              )}
             </div>
           </div>
         </div>
