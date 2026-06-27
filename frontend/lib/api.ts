@@ -93,6 +93,10 @@ export async function submitQuestionnaire(data: {
   experience: string;
   working_hours: number;
   preferred_traits: string;
+  play_budget?: string;
+  vocal_tolerance?: string;
+  grooming_preference?: string;
+  ideal_description?: string;
 }) {
   const res = await fetch(`${API_BASE_URL}/questionnaire`, {
     method: "POST",

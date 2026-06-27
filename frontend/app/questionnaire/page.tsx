@@ -3,21 +3,33 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { submitQuestionnaire } from "@/lib/api";
-import { motion, AnimatePresence } from "framer-motion";
-import { Home, Users, BookOpen, Clock, Heart, ArrowRight, ArrowLeft } from "lucide-react";
+import { motion } from "framer-motion";
+import { ClipboardList, Heart, Sparkles, RefreshCw, ArrowRight } from "lucide-react";
 
 export default function CompatibilityQuestionnaire() {
   const router = useRouter();
-  const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
 
-  // Form State
+  // Form States
   const [houseType, setHouseType] = useState("apartment");
+  const [experience, setExperience] = useState("beginner");
+  const [vocalTolerance, setVocalTolerance] = useState("any");
+  const [groomingPreference, setGroomingPreference] = useState("any");
+  
+  // Mapped Dropdowns
+  const [workingHoursRange, setWorkingHoursRange] = useState("8"); // maps to numeric hours
+  const [playBudget, setPlayBudget] = useState("active");
+
+  // Checkboxes
   const [kids, setKids] = useState(false);
   const [otherPets, setOtherPets] = useState(false);
-  const [experience, setExperience] = useState("beginner");
-  const [workingHours, setWorkingHours] = useState(8);
+
+  // Preferred Traits (Multi-select Checkboxes)
+  const availableTraits = ["friendly", "calm", "independent", "playful", "curious", "affectionate", "confident"];
   const [selectedTraits, setSelectedTraits] = useState<string[]>([]);
+
+  // Short Answer
+  const [idealDescription, setIdealDescription] = useState("");
 
   const handleTraitToggle = (trait: string) => {
     setSelectedTraits((prev) =>
@@ -25,10 +37,8 @@ export default function CompatibilityQuestionnaire() {
     );
   };
 
-  const handleNext = () => setStep((p) => Math.min(5, p + 1));
-  const handleBack = () => setStep((p) => Math.max(1, p - 1));
-
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setSubmitting(true);
     try {
       await submitQuestionnaire({
@@ -36,10 +46,14 @@ export default function CompatibilityQuestionnaire() {
         kids,
         other_pets: otherPets,
         experience,
-        working_hours: workingHours,
-        preferred_traits: selectedTraits.join(",")
+        working_hours: Number(workingHoursRange),
+        preferred_traits: selectedTraits.join(","),
+        play_budget: playBudget,
+        vocal_tolerance: vocalTolerance,
+        grooming_preference: groomingPreference,
+        ideal_description: idealDescription
       });
-      // Redirect to match scanning page
+      // Redirect to match scanning animation
       router.push("/match");
     } catch (err: any) {
       alert(err.message || "Failed to submit questionnaire.");
@@ -47,223 +61,239 @@ export default function CompatibilityQuestionnaire() {
     }
   };
 
-  const stepVariants = {
-    initial: { x: 50, opacity: 0 },
-    animate: { x: 0, opacity: 1, transition: { type: "spring" as const, stiffness: 120, damping: 18 } },
-    exit: { x: -50, opacity: 0 }
-  };
-
   return (
-    <div className="relative flex-grow flex flex-col items-center justify-center py-16 px-4 sm:px-6 lg:px-8 max-w-2xl mx-auto w-full z-10">
+    <div className="relative flex-grow py-12 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto w-full z-10">
       <div className="glow-bg" />
 
-      {/* Progress tracker */}
-      <div className="w-full flex items-center justify-between mb-8 text-xs font-semibold uppercase tracking-wider text-neutral-500">
-        <span>Step {step} of 5</span>
-        <div className="h-1 flex-grow mx-6 bg-neutral-900 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-red-600 transition-all duration-300"
-            style={{ width: `${(step / 5) * 100}%` }}
-          />
-        </div>
-        <span>{Math.round((step / 5) * 100)}%</span>
+      {/* Header */}
+      <div className="mb-8 border-b border-neutral-900 pb-6 text-center">
+        <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full border border-neutral-800 bg-neutral-950/60 text-[10px] font-mono text-neutral-400 mb-3">
+          <ClipboardList className="h-3 w-3 text-red-500" />
+          <span>Compatibility Analyzer</span>
+        </span>
+        <h1 className="text-3xl font-extrabold text-white">Adoption Compatibility Registry</h1>
+        <p className="text-xs text-neutral-400 mt-1">
+          Complete the single-page questionnaire below. Our backend matches your profile parameters against cat behavioral indexes.
+        </p>
       </div>
 
-      <div className="glass-card rounded-2xl border border-neutral-800 p-8 w-full min-h-[380px] flex flex-col justify-between">
-        <AnimatePresence mode="wait">
-          {step === 1 && (
-            <motion.div key="step1" variants={stepVariants} initial="initial" animate="animate" exit="exit" className="space-y-6">
-              <div className="flex items-center space-x-2 text-red-500">
-                <Home className="h-5 w-5" />
-                <h3 className="font-bold text-lg text-white">Your Living Environment</h3>
-              </div>
-              <p className="text-xs text-neutral-400">Where will your cat companion be spending most of their time?</p>
-              <div className="grid grid-cols-3 gap-4 pt-2">
-                {["apartment", "house", "studio"].map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setHouseType(type)}
-                    className={`py-6 px-4 rounded-xl border text-center font-bold capitalize transition-all ${
-                      houseType === type
-                        ? "border-red-500 bg-red-950/15 text-white"
-                        : "border-neutral-850 bg-neutral-950/60 text-neutral-400 hover:border-neutral-700 hover:text-white"
-                    }`}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          )}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Section 1: Household & Living */}
+        <div className="glass-card rounded-2xl border border-neutral-800 p-6 space-y-4">
+          <h3 className="text-xs font-bold text-red-500 uppercase tracking-widest flex items-center space-x-2">
+            <span>01. Living & Household Environment</span>
+          </h3>
 
-          {step === 2 && (
-            <motion.div key="step2" variants={stepVariants} initial="initial" animate="animate" exit="exit" className="space-y-6">
-              <div className="flex items-center space-x-2 text-red-500">
-                <Users className="h-5 w-5" />
-                <h3 className="font-bold text-lg text-white">Household Companions</h3>
-              </div>
-              <p className="text-xs text-neutral-400">Do you share your home with children or other pets?</p>
-              
-              <div className="space-y-4 pt-2">
-                <div className="flex items-center justify-between p-4 bg-neutral-950/60 border border-neutral-850 rounded-xl">
-                  <div>
-                    <h4 className="text-sm font-bold text-white">Children in Household</h4>
-                    <p className="text-xs text-neutral-500">Are there kids under 12 years living with you?</p>
-                  </div>
-                  <button
-                    onClick={() => setKids(!kids)}
-                    className={`w-14 h-8 rounded-full transition-all duration-300 relative ${
-                      kids ? "bg-red-600" : "bg-neutral-800"
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-1 left-1 bg-white h-6 w-6 rounded-full transition-all ${
-                        kids ? "translate-x-6" : ""
-                      }`}
-                    />
-                  </button>
-                </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">
+                Living Space Type
+              </label>
+              <select
+                value={houseType}
+                onChange={(e) => setHouseType(e.target.value)}
+                className="w-full py-2 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
+              >
+                <option value="apartment">Apartment</option>
+                <option value="house">House (Spacious)</option>
+                <option value="studio">Studio (Compact)</option>
+              </select>
+            </div>
 
-                <div className="flex items-center justify-between p-4 bg-neutral-950/60 border border-neutral-850 rounded-xl">
-                  <div>
-                    <h4 className="text-sm font-bold text-white">Other Pets</h4>
-                    <p className="text-xs text-neutral-500">Do you have other cats, dogs, or small animals?</p>
-                  </div>
-                  <button
-                    onClick={() => setOtherPets(!otherPets)}
-                    className={`w-14 h-8 rounded-full transition-all duration-300 relative ${
-                      otherPets ? "bg-red-600" : "bg-neutral-800"
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-1 left-1 bg-white h-6 w-6 rounded-full transition-all ${
-                        otherPets ? "translate-x-6" : ""
-                      }`}
-                    />
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          )}
+            <div>
+              <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">
+                Owner Experience Level
+              </label>
+              <select
+                value={experience}
+                onChange={(e) => setExperience(e.target.value)}
+                className="w-full py-2 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
+              >
+                <option value="beginner">Beginner (First-time owner)</option>
+                <option value="intermediate">Intermediate (Had pets before)</option>
+                <option value="expert">Expert (Experienced handler)</option>
+              </select>
+            </div>
+          </div>
 
-          {step === 3 && (
-            <motion.div key="step3" variants={stepVariants} initial="initial" animate="animate" exit="exit" className="space-y-6">
-              <div className="flex items-center space-x-2 text-red-500">
-                <BookOpen className="h-5 w-5" />
-                <h3 className="font-bold text-lg text-white">Cat Ownership Experience</h3>
+          <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <label className="flex items-start space-x-3 p-3 bg-neutral-950/40 border border-neutral-900 rounded-xl cursor-pointer hover:border-neutral-800 transition-colors">
+              <input
+                type="checkbox"
+                checked={kids}
+                onChange={(e) => setKids(e.target.checked)}
+                className="mt-1 h-3.5 w-3.5 rounded border-neutral-800 text-red-600 bg-neutral-950 focus:ring-0 focus:ring-offset-0 accent-red-600"
+              />
+              <div>
+                <span className="block text-xs font-bold text-white">Children in Household</span>
+                <span className="block text-[10px] text-neutral-500 mt-0.5">Kids under 12 years living in the home.</span>
               </div>
-              <p className="text-xs text-neutral-400">Select the experience level that matches your history with cats.</p>
-              
-              <div className="grid grid-cols-3 gap-4 pt-2">
-                {["beginner", "intermediate", "expert"].map((lvl) => (
-                  <button
-                    key={lvl}
-                    onClick={() => setExperience(lvl)}
-                    className={`py-6 px-4 rounded-xl border text-center font-bold capitalize transition-all ${
-                      experience === lvl
-                        ? "border-red-500 bg-red-950/15 text-white"
-                        : "border-neutral-850 bg-neutral-950/60 text-neutral-400 hover:border-neutral-700 hover:text-white"
-                    }`}
-                  >
-                    {lvl}
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          )}
+            </label>
 
-          {step === 4 && (
-            <motion.div key="step4" variants={stepVariants} initial="initial" animate="animate" exit="exit" className="space-y-6">
-              <div className="flex items-center space-x-2 text-red-500">
-                <Clock className="h-5 w-5" />
-                <h3 className="font-bold text-lg text-white">Daily Absence Hours</h3>
+            <label className="flex items-start space-x-3 p-3 bg-neutral-950/40 border border-neutral-900 rounded-xl cursor-pointer hover:border-neutral-800 transition-colors">
+              <input
+                type="checkbox"
+                checked={otherPets}
+                onChange={(e) => setOtherPets(e.target.checked)}
+                className="mt-1 h-3.5 w-3.5 rounded border-neutral-800 text-red-600 bg-neutral-950 focus:ring-0 focus:ring-offset-0 accent-red-600"
+              />
+              <div>
+                <span className="block text-xs font-bold text-white">Other Pets</span>
+                <span className="block text-[10px] text-neutral-500 mt-0.5">Dogs, other cats, or small animals live with you.</span>
               </div>
-              <p className="text-xs text-neutral-400">On average, how many hours is the household left unoccupied daily?</p>
-              
-              <div className="pt-6 space-y-4">
-                <div className="flex justify-between text-sm font-bold text-white">
-                  <span>Away time:</span>
-                  <span className="text-red-500">{workingHours} Hours/Day</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="16"
-                  step="1"
-                  value={workingHours}
-                  onChange={(e) => setWorkingHours(Number(e.target.value))}
-                  className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-red-600"
-                />
-                <div className="flex justify-between text-[10px] text-neutral-500 uppercase font-mono pt-2">
-                  <span>Home constantly (0 hrs)</span>
-                  <span>Full workday (8 hrs)</span>
-                  <span>Long away (12+ hrs)</span>
-                </div>
-              </div>
-            </motion.div>
-          )}
+            </label>
+          </div>
+        </div>
 
-          {step === 5 && (
-            <motion.div key="step5" variants={stepVariants} initial="initial" animate="animate" exit="exit" className="space-y-6">
-              <div className="flex items-center space-x-2 text-red-500">
-                <Heart className="h-5 w-5" />
-                <h3 className="font-bold text-lg text-white">Preferred Personality Traits</h3>
-              </div>
-              <p className="text-xs text-neutral-400">Select any key behaviors that describe your ideal cat companion.</p>
-              
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                {["friendly", "calm", "independent", "playful", "curious", "affectionate", "confident"].map((trait) => {
-                  const active = selectedTraits.includes(trait);
-                  return (
-                    <button
-                      key={trait}
-                      onClick={() => handleTraitToggle(trait)}
-                      className={`py-3 px-4 rounded-xl border text-left font-semibold capitalize text-xs transition-all ${
-                        active
-                          ? "border-red-500 bg-red-950/15 text-white"
-                          : "border-neutral-850 bg-neutral-950/60 text-neutral-400 hover:border-neutral-700 hover:text-white"
-                      }`}
-                    >
-                      {trait}
-                    </button>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Section 2: Time & Commitments */}
+        <div className="glass-card rounded-2xl border border-neutral-800 p-6 space-y-4">
+          <h3 className="text-xs font-bold text-red-500 uppercase tracking-widest flex items-center space-x-2">
+            <span>02. Schedule & Time Commitments</span>
+          </h3>
 
-        {/* Action Controls */}
-        <div className="mt-8 pt-6 border-t border-neutral-900 flex items-center justify-between">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">
+                Daily Absence Hours (Unoccupied home)
+              </label>
+              <select
+                value={workingHoursRange}
+                onChange={(e) => setWorkingHoursRange(e.target.value)}
+                className="w-full py-2 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
+              >
+                <option value="0">Home Constantly (0 hours)</option>
+                <option value="3">Short Absences (1-4 hours)</option>
+                <option value="8">Full Workday (5-8 hours)</option>
+                <option value="12">Long Absences (9+ hours)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">
+                Daily Active Play Commitment
+              </label>
+              <select
+                value={playBudget}
+                onChange={(e) => setPlayBudget(e.target.value)}
+                className="w-full py-2 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
+              >
+                <option value="quick">Quick Interaction (&lt;30 min/day)</option>
+                <option value="active">Active Playtime (30-60 min/day)</option>
+                <option value="extensive">Extensive Engagement (1-2 hours/day)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 3: Pet Profile Tolerances */}
+        <div className="glass-card rounded-2xl border border-neutral-800 p-6 space-y-4">
+          <h3 className="text-xs font-bold text-red-500 uppercase tracking-widest flex items-center space-x-2">
+            <span>03. Companion Behavioral Tolerances</span>
+          </h3>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">
+                Vocalization & Talkativeness
+              </label>
+              <select
+                value={vocalTolerance}
+                onChange={(e) => setVocalTolerance(e.target.value)}
+                className="w-full py-2 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
+              >
+                <option value="any">No Preference (Open to vocal or silent)</option>
+                <option value="silent">Quiet & Silent (Minimal vocal cues)</option>
+                <option value="talkative">Communicative & Vocal (Siamese mix behavior)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">
+                Grooming Commitment Preference
+              </label>
+              <select
+                value={groomingPreference}
+                onChange={(e) => setGroomingPreference(e.target.value)}
+                className="w-full py-2 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
+              >
+                <option value="any">No Preference (Open to any coat length)</option>
+                <option value="low_maintenance">Low Maintenance (Shorthair, minimal brushing)</option>
+                <option value="comfortable_daily">Comfortable with Daily Brushing (Longhair styles)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 4: Desired Traits Checkboxes */}
+        <div className="glass-card rounded-2xl border border-neutral-800 p-6 space-y-4">
+          <h3 className="text-xs font-bold text-red-500 uppercase tracking-widest flex items-center space-x-2">
+            <span>04. Ideal Temperament Traits</span>
+          </h3>
+          <p className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">Select all behaviors you expect from your cat:</p>
+          
+          <div className="flex flex-wrap gap-2 pt-1">
+            {availableTraits.map((trait) => {
+              const active = selectedTraits.includes(trait);
+              return (
+                <button
+                  type="button"
+                  key={trait}
+                  onClick={() => handleTraitToggle(trait)}
+                  className={`py-2 px-4 rounded-xl border font-bold capitalize text-xs transition-all cursor-pointer ${
+                    active
+                      ? "border-red-500 bg-red-950/20 text-white shadow-sm"
+                      : "border-neutral-850 bg-neutral-950/60 text-neutral-400 hover:border-neutral-700 hover:text-white"
+                  }`}
+                >
+                  {trait}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Section 5: Short Answer ideal cat description */}
+        <div className="glass-card rounded-2xl border border-neutral-800 p-6 space-y-4">
+          <h3 className="text-xs font-bold text-red-500 uppercase tracking-widest flex items-center space-x-2">
+            <span>05. Ideal Relationship Description</span>
+          </h3>
+          
+          <div>
+            <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">
+              Describe your ideal companion cat (Short Answer)
+            </label>
+            <textarea
+              rows={4}
+              value={idealDescription}
+              onChange={(e) => setIdealDescription(e.target.value)}
+              placeholder="e.g., I'm looking for a quiet lap cat that loves to cuddle and nap on the couch while I read, or a playful friend that gets along with other dogs..."
+              className="w-full py-3 px-4 bg-neutral-950 border border-neutral-800 rounded-lg text-xs text-neutral-300 focus:outline-none focus:border-red-500 resize-none leading-relaxed"
+            />
+          </div>
+        </div>
+
+        {/* Submit */}
+        <div className="flex justify-center pt-2">
           <button
-            onClick={handleBack}
-            disabled={step === 1 || submitting}
-            className="flex items-center space-x-1.5 px-4 py-2 border border-neutral-800 rounded-lg text-xs font-semibold text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+            type="submit"
+            disabled={submitting}
+            className="w-full max-w-md py-4 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white text-sm font-bold rounded-lg hover:shadow-lg hover:shadow-red-500/20 active:scale-98 transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center space-x-2"
           >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Back</span>
+            {submitting ? (
+              <>
+                <RefreshCw className="h-4 w-4 animate-spin" />
+                <span>Running Compatibility Calculations...</span>
+              </>
+            ) : (
+              <>
+                <Heart className="h-4 w-4 fill-white animate-pulse" />
+                <span>Evaluate Compatibility Matrix</span>
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
           </button>
-
-          {step < 5 ? (
-            <button
-              onClick={handleNext}
-              className="flex items-center space-x-1.5 px-5 py-2.5 bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer"
-            >
-              <span>Next</span>
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          ) : (
-            <button
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="flex items-center space-x-1.5 px-6 py-2.5 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white text-xs font-bold rounded-lg hover:shadow-lg hover:shadow-red-500/20 active:scale-98 transition-all disabled:opacity-50 cursor-pointer"
-            >
-              <span>{submitting ? "Matching..." : "Evaluate Compatibility"}</span>
-              <Heart className="h-4 w-4 fill-white" />
-            </button>
-          )}
         </div>
-      </div>
+      </form>
     </div>
   );
 }

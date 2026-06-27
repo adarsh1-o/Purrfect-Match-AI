@@ -30,6 +30,10 @@ def submit_questionnaire(
         questionnaire.experience = data.experience
         questionnaire.working_hours = data.working_hours
         questionnaire.preferred_traits = data.preferred_traits
+        questionnaire.play_budget = data.play_budget
+        questionnaire.vocal_tolerance = data.vocal_tolerance
+        questionnaire.grooming_preference = data.grooming_preference
+        questionnaire.ideal_description = data.ideal_description
     else:
         # Create new
         questionnaire = Questionnaire(
@@ -39,7 +43,11 @@ def submit_questionnaire(
             other_pets=data.other_pets,
             experience=data.experience,
             working_hours=data.working_hours,
-            preferred_traits=data.preferred_traits
+            preferred_traits=data.preferred_traits,
+            play_budget=data.play_budget,
+            vocal_tolerance=data.vocal_tolerance,
+            grooming_preference=data.grooming_preference,
+            ideal_description=data.ideal_description
         )
         db.add(questionnaire)
     

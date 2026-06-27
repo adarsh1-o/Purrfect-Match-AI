@@ -72,6 +72,10 @@ class QuestionnaireBase(BaseModel):
     experience: str  # beginner, intermediate, expert
     working_hours: int
     preferred_traits: str  # comma-separated string list
+    play_budget: Optional[str] = "active"
+    vocal_tolerance: Optional[str] = "any"
+    grooming_preference: Optional[str] = "any"
+    ideal_description: Optional[str] = ""
 
 class QuestionnaireCreate(QuestionnaireBase):
     pass

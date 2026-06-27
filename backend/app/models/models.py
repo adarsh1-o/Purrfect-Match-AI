@@ -74,6 +74,10 @@ class Questionnaire(Base):
     experience = Column(String(50), nullable=False)  # beginner, intermediate, expert
     working_hours = Column(Integer, default=8)
     preferred_traits = Column(String(500), default="")  # comma separated list
+    play_budget = Column(String(50), nullable=True)  # quick, active, extensive
+    vocal_tolerance = Column(String(50), nullable=True)  # silent, talkative, any
+    grooming_preference = Column(String(50), nullable=True)  # low_maintenance, comfortable_daily, any
+    ideal_description = Column(String(1000), nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     # Relationships

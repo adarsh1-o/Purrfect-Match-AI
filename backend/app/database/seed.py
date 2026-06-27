@@ -167,7 +167,11 @@ def seed_db():
             other_pets=False,
             experience="beginner",
             working_hours=8,
-            preferred_traits="friendly,calm,affectionate"
+            preferred_traits="friendly,calm,affectionate",
+            play_budget="active",
+            vocal_tolerance="any",
+            grooming_preference="any",
+            ideal_description="Looking for a friendly and calm companion to hang out with after work."
         )
         db.add(questionnaire)
         db.commit()

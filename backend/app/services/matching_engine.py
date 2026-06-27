@@ -130,6 +130,70 @@ class MatchingEngineService:
             if trait_matches > 0:
                 reasons.append(f"Matched {trait_matches} of your preferred personality expectations (e.g., traits you selected).")
 
+        # 7. Play Budget Matching
+        if hasattr(questionnaire, "play_budget") and questionnaire.play_budget:
+            if questionnaire.play_budget == "quick":
+                if playfulness > 0.75:
+                    score -= 15
+                    reasons.append(f"{cat.name} is highly playful and energetic, which might exceed your quick play schedule.")
+                else:
+                    score += 5
+                    reasons.append(f"{cat.name}'s moderate energy levels fit well with a quick play routine.")
+            elif questionnaire.play_budget == "extensive":
+                if playfulness >= 0.75:
+                    score += 10
+                    reasons.append(f"Excellent fit! {cat.name} thrives on active interaction and matches your extensive play budget.")
+                elif playfulness <= 0.4:
+                    score -= 10
+                    reasons.append(f"{cat.name} is calmer and might not engage as actively during your planned long play sessions.")
+
+        # 8. Vocal Tolerance Matching
+        if hasattr(questionnaire, "vocal_tolerance") and questionnaire.vocal_tolerance:
+            breed_lower = cat.breed.lower()
+            if questionnaire.vocal_tolerance == "silent":
+                if "siamese" in breed_lower or curiosity > 0.8:
+                    score -= 15
+                    reasons.append(f"{cat.name} belongs to a vocal breed or exhibits talkative tendencies, which conflicts with your preference for quiet.")
+                else:
+                    score += 5
+            elif questionnaire.vocal_tolerance == "talkative":
+                if "siamese" in breed_lower or curiosity >= 0.7:
+                    score += 10
+                    reasons.append(f"You'll love chatting with {cat.name}! They are very vocal and communicative.")
+
+        # 9. Grooming Preference Matching
+        if hasattr(questionnaire, "grooming_preference") and questionnaire.grooming_preference:
+            breed_lower = cat.breed.lower()
+            is_longhair = any(lh in breed_lower for lh in ["ragdoll", "persian", "main", "forest", "longhair"])
+            if questionnaire.grooming_preference == "low_maintenance":
+                if is_longhair:
+                    score -= 15
+                    reasons.append(f"{cat.name} has a long or high-maintenance coat that requires more frequent grooming than preferred.")
+                else:
+                    score += 5
+            elif questionnaire.grooming_preference == "comfortable_daily":
+                if is_longhair:
+                    score += 10
+                    reasons.append(f"{cat.name}'s luxury long coat matches your interest in daily grooming and brushing.")
+
+        # 10. Keyword Search on Ideal Description
+        if hasattr(questionnaire, "ideal_description") and questionnaire.ideal_description:
+            desc_lower = questionnaire.ideal_description.lower()
+            keyword_matches = 0
+            if any(w in desc_lower for w in ["active", "play", "run", "toy", "high"]):
+                if playfulness >= 0.7 or energy >= 0.7:
+                    keyword_matches += 1
+            if any(w in desc_lower for w in ["lap", "cuddle", "snuggle", "sweet", "friendly"]):
+                if friendliness >= 0.75:
+                    keyword_matches += 1
+            if any(w in desc_lower for w in ["quiet", "calm", "chill", "peaceful"]):
+                if energy <= 0.4:
+                    keyword_matches += 1
+            
+            if keyword_matches > 0:
+                score += keyword_matches * 5
+                reasons.append(f"Your description matched {cat.name}'s behavioral profile characteristics.")
+
         # Clamp score between 0.0 and 100.0
         final_score = float(max(10.0, min(100.0, score)))
         return round(final_score, 1), reasons
