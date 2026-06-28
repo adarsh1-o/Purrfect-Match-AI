@@ -17,6 +17,7 @@ class User(Base):
     password_hash = Column(String(200), nullable=True)
     address = Column(String(200), nullable=True)
     phone = Column(String(50), nullable=True)
+    reset_code = Column(String(50), nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     # Relationships

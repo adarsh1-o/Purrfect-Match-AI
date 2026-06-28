@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { loginUser, signupUser } from "@/lib/api";
+import { loginUser, signupUser, requestPasswordReset, submitPasswordReset } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck, Heart, User, ClipboardCheck, ArrowRight, RefreshCw, KeyRound, Sparkles, Eye, EyeOff } from "lucide-react";
 
@@ -13,6 +13,9 @@ export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [forgotMode, setForgotMode] = useState<"none" | "forgot" | "reset">("none");
+  const [resetCode, setResetCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
   // Form states
   const [name, setName] = useState("");
@@ -72,6 +75,37 @@ export default function AuthPage() {
     localStorage.clear();
     setCurrentUser(null);
     window.location.reload();
+  };
+
+  const handleForgotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      await requestPasswordReset(email);
+      setForgotMode("reset");
+      alert("A 6-digit verification code has been dispatched to your email address!");
+    } catch (err: any) {
+      setError(err.message || "Failed to request password reset code.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      await submitPasswordReset(email, resetCode, newPassword);
+      alert("Your password has been successfully reset! You can now sign in.");
+      setForgotMode("none");
+      setPassword("");
+    } catch (err: any) {
+      setError(err.message || "Invalid or expired reset code.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!mounted) return null;
@@ -161,13 +195,145 @@ export default function AuthPage() {
                 </p>
               </div>
 
-              {error && (
-                <div className="p-3 bg-red-950/20 border border-red-500/25 rounded-lg text-xs text-red-400">
-                  {error}
-                </div>
-              )}
+              {forgotMode === "forgot" ? (
+                <form onSubmit={handleForgotSubmit} className="space-y-4">
+                  {error && (
+                    <div className="p-3 bg-red-950/20 border border-red-500/25 rounded-lg text-xs text-red-400">
+                      {error}
+                    </div>
+                  )}
+                  <div>
+                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-2">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="adopter@kizunapaws.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full py-2.5 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
+                    />
+                  </div>
 
-              <form onSubmit={handleAuthSubmit} className="space-y-4">
+                  <button
+                     type="submit"
+                     disabled={loading}
+                     className="w-full py-3 bg-gradient-to-r from-red-650 to-red-550 hover:from-red-555 hover:to-red-455 text-white font-bold rounded-lg text-xs transition-all disabled:opacity-30 flex items-center justify-center space-x-1.5 cursor-pointer shadow-lg"
+                  >
+                    {loading ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                        <span>Sending Code...</span>
+                      </>
+                    ) : (
+                      <span>Send Verification Code</span>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotMode("none");
+                      setError(null);
+                    }}
+                    className="w-full text-center text-xs text-neutral-500 hover:text-neutral-300 font-semibold mt-2 cursor-pointer bg-transparent border-0"
+                  >
+                    Back to Sign In
+                  </button>
+                </form>
+              ) : forgotMode === "reset" ? (
+                <form onSubmit={handleResetSubmit} className="space-y-4">
+                  {error && (
+                    <div className="p-3 bg-red-950/20 border border-red-500/25 rounded-lg text-xs text-red-400">
+                      {error}
+                    </div>
+                  )}
+                  <div>
+                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-2">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      disabled
+                      value={email}
+                      className="w-full py-2.5 px-3 bg-neutral-900 border border-neutral-800 rounded-md text-xs text-neutral-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-2">
+                      6-Digit Reset Code
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={6}
+                      placeholder="123456"
+                      value={resetCode}
+                      onChange={(e) => setResetCode(e.target.value)}
+                      className="w-full py-2.5 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500 text-center tracking-widest font-bold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-2">
+                      New Password
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        required
+                        placeholder="••••••••"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        className="w-full py-2.5 pl-9 pr-10 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
+                      />
+                      <KeyRound className="absolute left-3 top-3.5 h-3.5 w-3.5 text-neutral-500" />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-3 text-neutral-500 hover:text-white transition-colors cursor-pointer"
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <button
+                     type="submit"
+                     disabled={loading}
+                     className="w-full py-3 bg-gradient-to-r from-red-650 to-red-550 hover:from-red-555 hover:to-red-455 text-white font-bold rounded-lg text-xs transition-all disabled:opacity-30 flex items-center justify-center space-x-1.5 cursor-pointer shadow-lg"
+                  >
+                    {loading ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                        <span>Resetting...</span>
+                      </>
+                    ) : (
+                      <span>Update Password & Log In</span>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotMode("none");
+                      setError(null);
+                    }}
+                    className="w-full text-center text-xs text-neutral-500 hover:text-neutral-300 font-semibold mt-2 cursor-pointer bg-transparent border-0"
+                  >
+                    Back to Sign In
+                  </button>
+                </form>
+              ) : (
+                <>
+                  {error && (
+                    <div className="p-3 bg-red-950/20 border border-red-500/25 rounded-lg text-xs text-red-400">
+                      {error}
+                    </div>
+                  )}
+                  <form onSubmit={handleAuthSubmit} className="space-y-4">
                 <AnimatePresence mode="wait">
                   {!isLogin && (
                     <motion.div
@@ -271,27 +437,43 @@ export default function AuthPage() {
                         <Eye className="h-4 w-4" />
                       )}
                     </button>
+                    </div>
+                    {isLogin && (
+                      <div className="flex justify-end mt-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setForgotMode("forgot");
+                            setError(null);
+                          }}
+                          className="text-[11px] text-red-500 hover:text-red-400 font-semibold cursor-pointer bg-transparent border-0"
+                        >
+                          Forgot Password?
+                        </button>
+                      </div>
+                    )}
                   </div>
-                </div>
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-3 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-bold rounded-lg text-xs transition-all disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center space-x-1.5 cursor-pointer shadow-lg shadow-red-600/10"
-                >
-                  {loading ? (
-                    <>
-                      <RefreshCw className="h-4 w-4 animate-spin" />
-                      <span>Authenticating...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4 fill-white" />
-                      <span>{isLogin ? "Sign In Securely" : "Create My Profile"}</span>
-                    </>
-                  )}
-                </button>
-              </form>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3 bg-gradient-to-r from-red-650 to-red-550 hover:from-red-550 hover:to-red-450 text-white font-bold rounded-lg text-xs transition-all disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center space-x-1.5 cursor-pointer shadow-lg shadow-red-600/10"
+                  >
+                    {loading ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                        <span>Authenticating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4 fill-white" />
+                        <span>{isLogin ? "Sign In Securely" : "Create My Profile"}</span>
+                      </>
+                    )}
+                  </button>
+                </form>
+              </>
+            )}
             </div>
           </div>
         )}

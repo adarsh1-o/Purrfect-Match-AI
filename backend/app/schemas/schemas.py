@@ -173,3 +173,11 @@ class PetStatusUpdate(BaseModel):
 
 class PetTransfer(BaseModel):
     new_owner_email: EmailStr
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+    code: str
+    new_password: str

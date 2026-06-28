@@ -94,6 +94,32 @@ class EmailService:
         return EmailService.send_email(user_email, subject, body_html, body_text)
 
     @staticmethod
+    def send_password_reset_email(to_email: str, reset_code: str) -> bool:
+        subject = "Purrfect Match AI - Password Reset Request 🐾"
+        
+        body_text = f"Hello,\n\nYou requested a password reset. Your verification code is: {reset_code}\n\n" \
+                    f"Please enter this code on the application to reset your password. If you did not make this request, please ignore."
+
+        body_html = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f7f1eb; color: #3d2d2a; padding: 20px;">
+                <div style="max-width: 500px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 30px; border: 1px solid #e5d8cd; text-align: center;">
+                    <h2 style="color: #ef4444; margin-top: 0; margin-bottom: 20px;">Password Reset Verification</h2>
+                    <p style="font-size: 14px;">You requested a password reset for your Purrfect Match AI account.</p>
+                    <p style="font-size: 14px;">Please enter the following 6-digit verification code to reset your password:</p>
+                    <div style="background-color: #f7f1eb; border: 1.5px dashed #ef4444; padding: 15px; font-size: 24px; font-weight: bold; letter-spacing: 5px; color: #3d2d2a; display: inline-block; margin: 20px 0; border-radius: 8px;">
+                        {reset_code}
+                    </div>
+                    <p style="font-size: 11px; color: #7f7f7f;">If you did not request this password reset, you can safely ignore this email.</p>
+                    <hr style="border: 0; border-top: 1px solid #e5d8cd; margin: 30px 0;">
+                    <p style="font-size: 10px; color: #a3a3a3;">Kizuna Paws Team • Purrfect Match AI</p>
+                </div>
+            </body>
+        </html>
+        """
+        return EmailService.send_email(to_email, subject, body_html, body_text)
+
+    @staticmethod
     def send_adoption_filed_email(adopter_email: str, adopter_name: str, cat_name: str, shelter_email: str) -> bool:
         # 1. Email to Adopter
         adopter_subject = f"Adoption Request Filed for {cat_name}! 🐈"

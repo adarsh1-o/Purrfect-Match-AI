@@ -309,3 +309,27 @@ export async function sendChatQuery(catId: string | null, message: string, file?
   }
   return res.json();
 }
+
+export async function requestPasswordReset(email: string) {
+  const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  if (!res.ok) {
+    await throwApiError(res, "Failed to initiate password reset");
+  }
+  return res.json();
+}
+
+export async function submitPasswordReset(email: string, code: string, newPassword: string) {
+  const res = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, code, new_password: newPassword }),
+  });
+  if (!res.ok) {
+    await throwApiError(res, "Failed to reset password");
+  }
+  return res.json();
+}

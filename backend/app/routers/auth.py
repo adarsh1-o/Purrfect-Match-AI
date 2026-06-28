@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Header, Backgroun
 from sqlalchemy.orm import Session
 from backend.app.database.connection import get_db
 from backend.app.models.models import User
-from backend.app.schemas.schemas import UserResponse, UserCreate, UserLogin
+from backend.app.schemas.schemas import UserResponse, UserCreate, UserLogin, ForgotPasswordRequest, ResetPasswordRequest
 from backend.app.services.auth_utils import hash_password, verify_password, create_access_token, decode_access_token
 from backend.app.services.email_service import EmailService
 from typing import Optional
@@ -113,3 +113,60 @@ def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials."
         )
+
+import random
+
+@router.post("/forgot-password")
+def forgot_password(
+    data: ForgotPasswordRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db)
+):
+    """
+    Initiates password reset process: generates code, stores in database, sends code via email.
+    """
+    user = db.query(User).filter(User.email == data.email).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No account associated with this email address."
+        )
+
+    # Generate 6-digit numeric verification code
+    code = f"{random.randint(100000, 999999)}"
+    user.reset_code = code
+    db.commit()
+
+    # Send reset code email in background
+    background_tasks.add_task(EmailService.send_password_reset_email, user.email, code)
+
+    return {"message": "Verification code dispatched to your email."}
+
+@router.post("/reset-password")
+def reset_password(
+    data: ResetPasswordRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Verifies code and updates user's password.
+    """
+    user = db.query(User).filter(User.email == data.email).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No account associated with this email address."
+        )
+
+    if not user.reset_code or user.reset_code != data.code:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired verification code."
+        )
+
+    # Reset password
+    hashed_pwd = hash_password(data.new_password)
+    user.password_hash = hashed_pwd
+    user.reset_code = None  # Clear code
+    db.commit()
+
+    return {"message": "Password updated successfully. You can now log in."}
