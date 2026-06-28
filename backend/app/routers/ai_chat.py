@@ -1,11 +1,14 @@
 import os
-from fastapi import APIRouter, Depends, HTTPException, status
+import shutil
+import tempfile
+import uuid
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy.orm import Session
 from backend.app.database.connection import get_db
 from backend.app.models.models import User, Cat, PersonalityProfile
-from backend.app.routers.auth import get_current_user
+from backend.app.services.ai_pipeline import AIPipelineService
 import logging
 
 logger = logging.getLogger("purrfect_match_ai")
@@ -19,36 +22,78 @@ except ImportError:
 
 router = APIRouter(tags=["AI Behavior Advisor"])
 
-# Pydantic schemas for chat
-class AIChatRequest(BaseModel):
-    cat_id: Optional[str] = None
-    message: str
-
+# Pydantic schemas for response
 class AIChatResponse(BaseModel):
     reply: str
     cat_id: Optional[str] = None
+    detected_behaviour: Optional[str] = None
+    mood: Optional[str] = None
 
 @router.post("/ai/chat", response_model=AIChatResponse)
 def get_ai_behavior_advice(
-    data: AIChatRequest,
+    message: str = Form(...),
+    cat_id: Optional[str] = Form(None),
+    file: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db)
 ):
     """
-    Kizuna AI: Feline Behavior Advisor
-    Provides behavior and care recommendations tailored to a cat's database personality profile.
+    Kizuna AI: Feline Behavior Advisor (Supports optional media uploads)
+    Provides behavior and care recommendations tailored to a cat's database personality profile and video analysis.
     """
-    message_lower = data.message.lower()
+    message_lower = message.lower()
     
-    # 1. Fetch Cat Profile if cat_id is provided
+    # 1. Handle optional file upload
+    detected_behaviour = None
+    mood = None
+    vision_context = ""
+    
+    if file:
+        filename = file.filename
+        ext = os.path.splitext(filename)[1].lower()
+        if ext in [".jpg", ".jpeg", ".png", ".webp"]:
+            media_type = "image"
+        elif ext in [".mp4", ".avi", ".mov", ".mkv", ".webm"]:
+            media_type = "video"
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unsupported media format. Please upload standard image or video files."
+            )
+            
+        temp_dir = tempfile.gettempdir()
+        temp_file_path = os.path.join(temp_dir, f"chat_upload_{uuid.uuid4()}{ext}")
+        
+        try:
+            with open(temp_file_path, "wb") as buffer:
+                shutil.copyfileobj(file.file, buffer)
+                
+            ai_pipeline = AIPipelineService()
+            analysis_result = ai_pipeline.analyze_media(temp_file_path, media_type)
+            
+            detected_behaviour = analysis_result.get("detected_behaviour")
+            mood = analysis_result.get("mood")
+            
+            recs = analysis_result.get("recommendations", {})
+            play_rec = recs.get("play", "")
+            social_rec = recs.get("social", "")
+            
+            vision_context = f"\n[Visual Diagnostics: Our CV pipeline analyzed the photo/video of this cat. Behavior detected: '{detected_behaviour}', Mood: '{mood}'. Play advice: {play_rec}. Social advice: {social_rec}.]"
+        except Exception as e:
+            logger.error(f"Failed to run vision diagnostics inside chatbot: {e}")
+        finally:
+            if os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
+
+    # 2. Fetch Cat Profile if cat_id is provided
     cat = None
     profile = None
-    if data.cat_id:
-        cat = db.query(Cat).filter(Cat.id == data.cat_id).first()
+    if cat_id and cat_id not in ["", "none", "null"]:
+        cat = db.query(Cat).filter(Cat.id == cat_id).first()
         if cat:
             profile = cat.personality_profile
 
-    # 2. Extract values for context
-    cat_name = cat.name if cat else "General Cat"
+    # 3. Extract values for context
+    cat_name = cat.name if cat else "this cat"
     breed = cat.breed if cat else "Mixed Breed"
     age = cat.age if cat else 2
     playfulness = profile.playfulness if profile else 0.5
@@ -58,7 +103,7 @@ def get_ai_behavior_advice(
     friendliness = profile.friendliness if profile else 0.5
     independence = profile.independence if profile else 0.5
 
-    # 3. Check for Gemini Key and attempt real AI generation
+    # 4. Check for Gemini Key and attempt real AI generation
     api_key = os.getenv("GEMINI_API_KEY")
     if api_key and GEMINI_AVAILABLE:
         try:
@@ -79,24 +124,30 @@ def get_ai_behavior_advice(
             - Confidence: {confidence}/1.0
             - Friendliness: {friendliness}/1.0
             - Independence: {independence}/1.0
+            {vision_context}
             
-            Answer the user's message: "{data.message}"
-            Make your response warm, friendly, concise (maximum 3-4 sentences), and refer specifically to their profile values when relevant.
+            Answer the user's message: "{message}"
+            Make your response warm, friendly, concise (maximum 3-4 sentences), and refer specifically to their profile values or the detected visual mood/behavior when relevant.
             """
             
             response = model.generate_content(prompt)
             if response and response.text:
-                return AIChatResponse(reply=response.text.strip(), cat_id=data.cat_id)
+                return AIChatResponse(
+                    reply=response.text.strip(),
+                    cat_id=cat_id,
+                    detected_behaviour=detected_behaviour,
+                    mood=mood
+                )
         except Exception as e:
             logger.error(f"Gemini chat API failed: {e}. Falling back to local heuristics.")
 
-    # 4. Local Expert Fallback Parser (Deterministic rule-based heuristics)
+    # 5. Local Expert Fallback Parser (Deterministic rule-based heuristics)
     reply = ""
     
     # Hide / Shy keywords
     if any(w in message_lower for w in ["hide", "shy", "scared", "fearful", "run away", "under"]):
         if confidence <= 0.45:
-            reply = f"{cat_name} has lower confidence (rated {confidence}/1.0). In new environments, they will naturally hide. Provide a quiet, enclosed 'safe room' (like a spare bedroom) with their litter box and food. Sit quietly near them without forcing contact to build trust over time."
+            reply = f"{cat_name} has lower confidence (rated {confidence}/1.0). In new environments, they will naturally hide. Provide a quiet, enclosed 'safe room' with their litter box and food. Sit quietly near them without forcing contact to build trust over time."
         else:
             reply = f"{cat_name} is generally confident ({confidence}/1.0). If they are hiding, it is likely due to sudden loud noises or a major household change. Make sure they have vertical perches to climb and observe safely from a distance."
             
@@ -132,4 +183,13 @@ def get_ai_behavior_advice(
         else:
             reply = "I'm your Kizuna AI Behavior Advisor! Ask me about managing cat habits, resolving shyness, play schedules, or how to read your feline's body language."
 
-    return AIChatResponse(reply=reply, cat_id=data.cat_id)
+    # Append visual diagnostics details if a file was uploaded and processed in local fallback
+    if detected_behaviour and mood:
+        reply = f"I've analyzed the uploaded media! 🐾 I detected a **{detected_behaviour}** behavior, with a **{mood}** mood. Based on this, here is my advice:\n\n{reply}"
+
+    return AIChatResponse(
+        reply=reply,
+        cat_id=cat_id,
+        detected_behaviour=detected_behaviour,
+        mood=mood
+    )

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { fetchDashboardData, uploadBehaviourMedia, sendChatQuery } from "@/lib/api";
-import { ShieldCheck, Video, LayoutDashboard, Sparkles, Smile, RefreshCw, ClipboardList, CheckCircle, Clock } from "lucide-react";
+import { ShieldCheck, Video, LayoutDashboard, Sparkles, Smile, RefreshCw, ClipboardList, CheckCircle, Clock, Paperclip } from "lucide-react";
 import Link from "next/link";
 
 export default function AdopterDashboard() {
@@ -19,6 +19,7 @@ export default function AdopterDashboard() {
   // Chatbot states
   const [chatCatId, setChatCatId] = useState("");
   const [chatInput, setChatInput] = useState("");
+  const [chatFile, setChatFile] = useState<File | null>(null);
   const [chatMessages, setChatMessages] = useState<any[]>([
     { sender: "ai", text: "Hello! I am your Kizuna AI Behavior Advisor. Ask me anything about general cat behavior, play schedules, or shyness traits!" }
   ]);
@@ -69,15 +70,22 @@ export default function AdopterDashboard() {
 
   const handleChatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!chatInput.trim()) return;
+    if (!chatInput.trim() && !chatFile) return;
 
-    const userMsg = chatInput.trim();
-    setChatMessages((prev) => [...prev, { sender: "user", text: userMsg }]);
+    const userMsg = chatInput.trim() || (chatFile ? `Analyze this uploaded ${chatFile.type.startsWith("video/") ? "video" : "photo"}` : "");
+    let displayMsg = userMsg;
+    if (chatFile) {
+      displayMsg += ` 📸 [File: ${chatFile.name}]`;
+    }
+
+    setChatMessages((prev) => [...prev, { sender: "user", text: displayMsg }]);
     setChatInput("");
+    const fileToUpload = chatFile;
+    setChatFile(null);
     setChatLoading(true);
 
     try {
-      const response = await sendChatQuery(chatCatId || null, userMsg);
+      const response = await sendChatQuery(chatCatId || null, userMsg, fileToUpload);
       setChatMessages((prev) => [...prev, { sender: "ai", text: response.reply }]);
     } catch (err: any) {
       setChatMessages((prev) => [...prev, { sender: "ai", text: `Sorry, I encountered an error: ${err.message}` }]);
@@ -389,11 +397,42 @@ export default function AdopterDashboard() {
               )}
             </div>
 
+            {/* Selected File Preview Badge */}
+            {chatFile && (
+              <div className="flex items-center justify-between p-2 mb-2 rounded bg-neutral-900 border border-neutral-850 text-[10px] text-neutral-400">
+                <span className="truncate max-w-[80%] flex items-center gap-1 font-mono">
+                  <Paperclip className="h-3.5 w-3.5 text-red-500 shrink-0" />
+                  {chatFile.name}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setChatFile(null)}
+                  className="text-red-550 hover:text-red-400 font-bold ml-1 cursor-pointer shrink-0"
+                >
+                  Remove
+                </button>
+              </div>
+            )}
+
             {/* Input form */}
-            <form onSubmit={handleChatSubmit} className="flex gap-2">
+            <form onSubmit={handleChatSubmit} className="flex gap-2 items-center">
+              <label className="p-2 border border-neutral-800 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-400 hover:text-white rounded-md cursor-pointer transition-colors relative shrink-0 flex items-center justify-center">
+                <input
+                  type="file"
+                  accept="image/*,video/*"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      setChatFile(e.target.files[0]);
+                    }
+                  }}
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                />
+                <Paperclip className="h-3.5 w-3.5" />
+              </label>
+
               <input
                 type="text"
-                placeholder="Ask about shyness, scratching, diet..."
+                placeholder="Ask advice or upload a video..."
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 disabled={chatLoading}
@@ -401,7 +440,7 @@ export default function AdopterDashboard() {
               />
               <button
                 type="submit"
-                disabled={chatLoading || !chatInput.trim()}
+                disabled={chatLoading || (!chatInput.trim() && !chatFile)}
                 className="px-4 py-2 bg-gradient-to-r from-red-650 to-red-550 hover:from-red-550 hover:to-red-450 text-white font-bold rounded-md text-xs hover:shadow-md cursor-pointer disabled:opacity-50 transition-all active:scale-95"
               >
                 Ask

@@ -287,11 +287,22 @@ export async function deleteCat(catId: string) {
   return res.json();
 }
 
-export async function sendChatQuery(catId: string | null, message: string) {
+export async function sendChatQuery(catId: string | null, message: string, file?: File | null) {
+  const formData = new FormData();
+  formData.append("message", message);
+  if (catId) formData.append("cat_id", catId);
+  if (file) formData.append("file", file);
+
+  const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+  const headers: HeadersInit = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   const res = await fetch(`${API_BASE_URL}/ai/chat`, {
     method: "POST",
-    headers: getHeaders(),
-    body: JSON.stringify({ cat_id: catId, message }),
+    headers,
+    body: formData,
   });
   if (!res.ok) {
     await throwApiError(res, "Failed to retrieve AI advice");

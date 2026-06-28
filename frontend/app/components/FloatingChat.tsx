@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Sparkles, MessageCircle, X, Send } from "lucide-react";
+import { Sparkles, MessageCircle, X, Send, Paperclip } from "lucide-react";
 import { sendChatQuery } from "@/lib/api";
 
 export default function FloatingChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [chatCatId, setChatCatId] = useState("");
   const [chatInput, setChatInput] = useState("");
+  const [chatFile, setChatFile] = useState<File | null>(null);
   const [chatMessages, setChatMessages] = useState<any[]>([
     { sender: "ai", text: "Hello! I am your Kizuna AI Behavior Advisor. Ask me anything about general cat behavior, play schedules, or shyness traits!" }
   ]);
@@ -31,16 +32,23 @@ export default function FloatingChat() {
 
   const handleChatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!chatInput.trim()) return;
+    if (!chatInput.trim() && !chatFile) return;
 
-    const userMsg = chatInput.trim();
-    setChatMessages((prev) => [...prev, { sender: "user", text: userMsg }]);
+    const userMsg = chatInput.trim() || (chatFile ? `Analyze this uploaded ${chatFile.type.startsWith("video/") ? "video" : "photo"}` : "");
+    let displayMsg = userMsg;
+    if (chatFile) {
+      displayMsg += ` 📸 [File: ${chatFile.name}]`;
+    }
+
+    setChatMessages((prev) => [...prev, { sender: "user", text: displayMsg }]);
     setChatInput("");
+    const fileToUpload = chatFile;
+    setChatFile(null);
     setChatLoading(true);
 
     try {
       // Pass the name context of the featured cat to the backend query
-      const response = await sendChatQuery(chatCatId || null, userMsg);
+      const response = await sendChatQuery(chatCatId || null, userMsg, fileToUpload);
       setChatMessages((prev) => [...prev, { sender: "ai", text: response.reply }]);
     } catch (err: any) {
       setChatMessages((prev) => [...prev, { sender: "ai", text: `Sorry, I encountered an error: ${err.message}` }]);
@@ -122,11 +130,42 @@ export default function FloatingChat() {
             )}
           </div>
 
+          {/* Selected File Preview Badge */}
+          {chatFile && (
+            <div className="mx-4 p-2 mb-2 rounded bg-neutral-900 border border-neutral-850 text-[10px] text-neutral-400 flex items-center justify-between">
+              <span className="truncate max-w-[80%] flex items-center gap-1 font-mono">
+                <Paperclip className="h-3.5 w-3.5 text-red-500 shrink-0" />
+                {chatFile.name}
+              </span>
+              <button
+                type="button"
+                onClick={() => setChatFile(null)}
+                className="text-red-555 hover:text-red-400 font-bold ml-1 cursor-pointer shrink-0"
+              >
+                Remove
+              </button>
+            </div>
+          )}
+
           {/* Footer Input */}
-          <form onSubmit={handleChatSubmit} className="p-3 border-t border-neutral-900 flex gap-2 bg-neutral-950/60">
+          <form onSubmit={handleChatSubmit} className="p-3 border-t border-neutral-900 flex gap-2 bg-neutral-950/60 items-center">
+            <label className="p-2 border border-neutral-800 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-400 hover:text-white rounded-md cursor-pointer transition-colors relative shrink-0 flex items-center justify-center">
+              <input
+                type="file"
+                accept="image/*,video/*"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files.length > 0) {
+                    setChatFile(e.target.files[0]);
+                  }
+                }}
+                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+              />
+              <Paperclip className="h-3.5 w-3.5" />
+            </label>
+
             <input
               type="text"
-              placeholder="Ask about shyness, scratching, active play..."
+              placeholder="Ask advice or upload a video..."
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
               disabled={chatLoading}
@@ -134,7 +173,7 @@ export default function FloatingChat() {
             />
             <button
               type="submit"
-              disabled={chatLoading || !chatInput.trim()}
+              disabled={chatLoading || (!chatInput.trim() && !chatFile)}
               className="p-2 bg-gradient-to-r from-red-650 to-red-550 text-white rounded-md hover:shadow-md cursor-pointer disabled:opacity-50 transition-all flex items-center justify-center shrink-0 active:scale-95"
             >
               <Send className="h-3.5 w-3.5" />
