@@ -36,7 +36,7 @@ class Cat(Base):
     gender = Column(String(50), nullable=False)  # male, female
     description = Column(String(1000), nullable=True)
     image_url = Column(String(500), nullable=True)
-    shelter_id = Column(String(36), nullable=True)  # References a User with role='shelter'
+    shelter_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     owner_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     status = Column(String(50), default="available")  # available, pending, adopted, passed_away, transferred
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
@@ -47,6 +47,7 @@ class Cat(Base):
     adoption_requests = relationship("AdoptionRequest", back_populates="cat", cascade="all, delete-orphan")
     behaviour_logs = relationship("BehaviourLog", back_populates="cat", cascade="all, delete-orphan")
     owner = relationship("User", back_populates="owned_cats", foreign_keys=[owner_id])
+    shelter = relationship("User", foreign_keys=[shelter_id])
 
 class PersonalityProfile(Base):
     __tablename__ = "personality_profiles"

@@ -450,6 +450,56 @@ export default function AdopterDashboard() {
         </div>
       </div>
 
+      {/* Shelter & Partner Care Directory */}
+      {data.shelter_directory && data.shelter_directory.length > 0 && (
+        <div className="mt-12 glass-card rounded-2xl border border-neutral-800 p-6">
+          <h3 className="text-lg font-bold text-white mb-2">Kizuna Shelter & Care Partner Directory</h3>
+          <p className="text-xs text-neutral-400 mb-6">Connect directly with our care shelters and browse their current companion listings.</p>
+          
+          <div className="space-y-6">
+            {data.shelter_directory.map((shelter: any) => (
+              <div key={shelter.id} className="p-6 bg-neutral-950/50 border border-neutral-900 rounded-xl space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-neutral-900 pb-3 gap-2">
+                  <div>
+                    <h4 className="text-sm font-bold text-white">{shelter.name}</h4>
+                    <p className="text-xs text-neutral-400 mt-0.5">📍 {shelter.address || "Address not listed"}</p>
+                  </div>
+                  <div className="text-[11px] text-neutral-400 space-y-0.5 text-left sm:text-right">
+                    <div>✉️ {shelter.email}</div>
+                    {shelter.phone && <div>📞 {shelter.phone}</div>}
+                  </div>
+                </div>
+
+                <div>
+                  <span className="text-[10px] text-neutral-500 uppercase font-mono block mb-3">Available Companions at this Shelter ({shelter.cats.length})</span>
+                  {shelter.cats.length === 0 ? (
+                    <p className="text-[11px] text-neutral-500">No active cat companions listed currently.</p>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                      {shelter.cats.map((cat: any) => (
+                        <Link
+                          key={cat.id}
+                          href={`/cats/${cat.id}`}
+                          className="p-3 bg-neutral-950 border border-neutral-850 hover:border-red-500/40 rounded-xl flex flex-col items-center text-center transition-colors group"
+                        >
+                          <img
+                            src={cat.image_url || "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=200&auto=format"}
+                            alt={cat.name}
+                            className="h-16 w-16 rounded-full object-cover border border-neutral-800 group-hover:scale-105 transition-transform"
+                          />
+                          <span className="text-xs font-bold text-white mt-2 group-hover:text-red-400 transition-colors truncate max-w-full">{cat.name}</span>
+                          <span className="text-[10px] text-neutral-500 truncate max-w-full">{cat.breed}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Historical Logs List */}
       {data.behaviour_logs && data.behaviour_logs.length > 0 && (
         <div className="mt-12 glass-card rounded-2xl border border-neutral-800 p-6">

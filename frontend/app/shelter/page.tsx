@@ -315,6 +315,58 @@ export default function ShelterDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Placed Adopters Log */}
+      {data.placed_adopters && data.placed_adopters.length > 0 && (
+        <div className="mt-8 glass-card rounded-2xl border border-neutral-800 p-6">
+          <h3 className="text-lg font-bold text-white mb-2 flex items-center space-x-2">
+            <UserCheck className="h-5 w-5 text-emerald-500" />
+            <span>Placed Adopters & Successful Placements ({data.placed_adopters.length})</span>
+          </h3>
+          <p className="text-xs text-neutral-400 mb-6">Historical record of all successful adoptions finalized by your shelter.</p>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-neutral-900 text-neutral-500 font-semibold uppercase tracking-wider">
+                  <th className="py-3 px-4">Adopter Details</th>
+                  <th className="py-3 px-4">Contact Info</th>
+                  <th className="py-3 px-4">Placement Partner</th>
+                  <th className="py-3 px-4">Approved Date</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-900/50">
+                {data.placed_adopters.map((log: any) => (
+                  <tr key={log.request_id} className="hover:bg-neutral-950/20">
+                    <td className="py-3.5 px-4">
+                      <div className="font-bold text-white text-xs">{log.adopter.name}</div>
+                      <div className="text-[10px] text-neutral-500 mt-0.5">📍 {log.adopter.address || "No address on file"}</div>
+                    </td>
+                    <td className="py-3.5 px-4 space-y-0.5 text-neutral-400">
+                      <div>✉️ {log.adopter.email}</div>
+                      {log.adopter.phone && <div className="text-[10px]">📞 {log.adopter.phone}</div>}
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center space-x-2">
+                        <div className="h-7 w-7 rounded-full overflow-hidden bg-neutral-900 border border-neutral-850">
+                          <img src={log.cat.image_url} alt={log.cat.name} className="h-full w-full object-cover" />
+                        </div>
+                        <div>
+                          <span className="font-semibold text-white">{log.cat.name}</span>
+                          <span className="text-[10px] text-neutral-500 block">{log.cat.breed}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4 text-neutral-500 font-mono">
+                      {new Date(log.approved_at).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

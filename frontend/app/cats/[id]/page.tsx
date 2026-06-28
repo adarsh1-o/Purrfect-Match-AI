@@ -244,6 +244,19 @@ export default function CatDetails() {
               <p className="mt-3 text-neutral-400 text-sm leading-relaxed whitespace-pre-line">{cat.description}</p>
             </div>
 
+            {/* Shelter Information Card */}
+            {cat.shelter && (
+              <div className="mt-8 p-6 rounded-2xl bg-neutral-900/30 border border-neutral-800 space-y-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-500">Contact Shelter & Care Location</h4>
+                <div className="space-y-1.5">
+                  <div className="text-sm font-bold text-white">{cat.shelter.name}</div>
+                  <div className="text-xs text-neutral-400">📍 {cat.shelter.address || "Address not listed"}</div>
+                  <div className="text-xs text-neutral-400">✉️ {cat.shelter.email}</div>
+                  {cat.shelter.phone && <div className="text-xs text-neutral-400">📞 {cat.shelter.phone}</div>}
+                </div>
+              </div>
+            )}
+
             {/* Explainable AI matching reasons */}
             {cat.reasons && cat.reasons.length > 0 && (
               <div className="mt-8 p-6 rounded-2xl bg-neutral-900/30 border border-neutral-800">

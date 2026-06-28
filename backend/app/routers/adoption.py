@@ -132,8 +132,8 @@ def get_dashboard_data(
 ):
     """
     Returns consolidated dashboard records based on the user's role.
-    Adopters see questionnaire states, pending application queues, adopted cats, and behavior logs.
-    Shelters see shelter cats and all pending adoption applications to review.
+    Adopters see questionnaire states, pending application queues, adopted cats, behavior logs, and shelter directory.
+    Shelters see shelter cats, pending adoption applications, and successful placed adopters log.
     """
     if current_user.role == "shelter":
         # Shelter Dashboard Payload
@@ -141,10 +141,42 @@ def get_dashboard_data(
             Cat.shelter_id == current_user.id
         ).all()
 
-        pending_requests = db.query(AdoptionRequest).options(
+        pending_requests = db.query(AdoptionRequest).join(Cat).options(
             joinedload(AdoptionRequest.cat),
             joinedload(AdoptionRequest.user)
-        ).filter(AdoptionRequest.status == "pending").all()
+        ).filter(
+            Cat.shelter_id == current_user.id,
+            AdoptionRequest.status == "pending"
+        ).all()
+
+        # Placed Adopters Log: Successful placements from this shelter
+        placements = db.query(AdoptionRequest).join(Cat).options(
+            joinedload(AdoptionRequest.cat),
+            joinedload(AdoptionRequest.user)
+        ).filter(
+            Cat.shelter_id == current_user.id,
+            AdoptionRequest.status == "approved"
+        ).all()
+
+        placed_adopters = [
+            {
+                "request_id": r.request_id,
+                "approved_at": r.created_at.isoformat(),
+                "cat": {
+                    "id": r.cat.id,
+                    "name": r.cat.name,
+                    "breed": r.cat.breed,
+                    "image_url": r.cat.image_url
+                },
+                "adopter": {
+                    "id": r.user.id,
+                    "name": r.user.name,
+                    "email": r.user.email,
+                    "phone": r.user.phone,
+                    "address": r.user.address
+                }
+            } for r in placements
+        ]
 
         return {
             "role": "shelter",
@@ -172,7 +204,8 @@ def get_dashboard_data(
                         "email": r.user.email
                     }
                 } for r in pending_requests
-            ]
+            ],
+            "placed_adopters": placed_adopters
         }
 
     # Adopter Dashboard Payload
@@ -193,6 +226,29 @@ def get_dashboard_data(
         BehaviourLog.timestamp.desc()
     ).all()
 
+    # Shelter Directory: List all shelters and their available cats
+    shelters = db.query(User).filter(User.role == "shelter").all()
+    shelter_directory = []
+    for s in shelters:
+        cats = db.query(Cat).filter(Cat.shelter_id == s.id, Cat.status == "available").all()
+        shelter_directory.append({
+            "id": s.id,
+            "name": s.name,
+            "email": s.email,
+            "phone": s.phone,
+            "address": s.address,
+            "cats": [
+                {
+                    "id": c.id,
+                    "name": c.name,
+                    "breed": c.breed,
+                    "age": c.age,
+                    "gender": c.gender,
+                    "image_url": c.image_url
+                } for c in cats
+            ]
+        })
+
     return {
         "role": "adopter",
         "user": {
@@ -204,5 +260,6 @@ def get_dashboard_data(
         "questionnaire": questionnaire,
         "active_requests": requests,
         "adopted_cats": adopted_cats_query,
-        "behaviour_logs": behaviour_logs
+        "behaviour_logs": behaviour_logs,
+        "shelter_directory": shelter_directory
     }

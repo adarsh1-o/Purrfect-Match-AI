@@ -26,7 +26,10 @@ def get_cats(
     Lists available cats. If the user has completed their compatibility questionnaire,
     returns their live compatibility score and details for each cat, sorted by compatibility.
     """
-    query = db.query(Cat).options(joinedload(Cat.personality_profile)).filter(Cat.status == "available")
+    query = db.query(Cat).options(
+        joinedload(Cat.personality_profile),
+        joinedload(Cat.shelter)
+    ).filter(Cat.status == "available")
 
     # Apply filters
     if gender:
@@ -106,7 +109,10 @@ def get_cat(
     current_user: User = Depends(get_current_user)
 ):
     """Retrieves a single cat profile with its personality profile details."""
-    cat = db.query(Cat).options(joinedload(Cat.personality_profile)).filter(Cat.id == id).first()
+    cat = db.query(Cat).options(
+        joinedload(Cat.personality_profile),
+        joinedload(Cat.shelter)
+    ).filter(Cat.id == id).first()
     if not cat:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

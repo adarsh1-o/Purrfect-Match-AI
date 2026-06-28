@@ -42,6 +42,17 @@ class PersonalityResponse(PersonalityBase):
     class Config:
         from_attributes = True
 
+# --- SHELTER MIN SCHEMA ---
+class ShelterMinResponse(BaseModel):
+    id: str
+    name: str
+    email: str
+    address: Optional[str] = None
+    phone: Optional[str] = None
+    
+    class Config:
+        from_attributes = True
+
 # --- CAT SCHEMAS ---
 class CatBase(BaseModel):
     name: str
@@ -58,6 +69,7 @@ class CatCreate(CatBase):
 class CatResponse(CatBase):
     id: str
     shelter_id: Optional[str] = None
+    shelter: Optional[ShelterMinResponse] = None
     created_at: datetime
     personality_profile: Optional[PersonalityResponse] = None
 

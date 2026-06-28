@@ -223,6 +223,13 @@ export default function BrowseCats() {
                   {cat.description}
                 </p>
 
+                {cat.shelter && (
+                  <div className="mt-3 pt-2.5 border-t border-neutral-900/60 flex flex-col gap-0.5 text-[11px] text-neutral-500">
+                    <span className="font-semibold text-neutral-400">Shelter: {cat.shelter.name}</span>
+                    <span className="truncate">📍 {cat.shelter.address || "Address not listed"}</span>
+                  </div>
+                )}
+
                 {/* Micro-personality Trait Badges */}
                 {cat.personality_profile && (
                   <div className="mt-6 flex flex-wrap gap-1.5 pt-4 border-t border-neutral-900">
