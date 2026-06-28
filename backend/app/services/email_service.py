@@ -11,7 +11,7 @@ SMTP_HOST = os.getenv("SMTP_HOST", "")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER = os.getenv("SMTP_USER", "")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
-SENDER_EMAIL = os.getenv("SENDER_EMAIL", "noreply@kizunapaws.com")
+SENDER_EMAIL = os.getenv("SENDER_EMAIL", "purrfectmatchai.app@gmail.com")
 
 class EmailService:
     @staticmethod
@@ -43,7 +43,7 @@ class EmailService:
         try:
             msg = MIMEMultipart("alternative")
             msg["Subject"] = subject
-            msg["From"] = f"Kizuna Paws <{SENDER_EMAIL}>"
+            msg["From"] = f"Purrfect Match AI | Kizuna Paws <{SENDER_EMAIL}>"
             msg["To"] = to_email
 
             part1 = MIMEText(body_text, "plain")
