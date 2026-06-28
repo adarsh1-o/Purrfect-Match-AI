@@ -70,4 +70,4 @@ To guarantee the judges can run and verify the project instantly out-of-the-box 
 
 ---
 
-*Submitted for #hackthekitty 2026. Kizuna Paws Project.*
+*Submitted for #hackthekitty 2026. Kizuna Paws Team. Purrfect Match AI Project.*
