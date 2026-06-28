@@ -184,7 +184,7 @@ export default function AuthPage() {
                         <div className="relative">
                           <input
                             type="text"
-                            placeholder="Ananya Kota"
+                            placeholder="Your Full Name"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             className="w-full py-2.5 pl-9 pr-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
