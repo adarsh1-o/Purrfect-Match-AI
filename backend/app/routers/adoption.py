@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Form
+from fastapi import APIRouter, Depends, HTTPException, status, Form, BackgroundTasks
 from sqlalchemy.orm import Session, joinedload
 from backend.app.database.connection import get_db
 from backend.app.models.models import User, Cat, AdoptionRequest, Questionnaire, BehaviourLog
 from backend.app.schemas.schemas import AdoptionResponse, AdoptionCreate, DashboardResponse
 from backend.app.routers.auth import get_current_user
+from backend.app.services.email_service import EmailService
 from typing import List, Optional
 
 router = APIRouter(tags=["Adoption & Dashboard"])
@@ -11,6 +12,7 @@ router = APIRouter(tags=["Adoption & Dashboard"])
 @router.post("/adoption-request", response_model=AdoptionResponse)
 def submit_adoption_request(
     data: AdoptionCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -56,11 +58,23 @@ def submit_adoption_request(
         AdoptionRequest.request_id == new_request.request_id
     ).first()
     
+    # Trigger notification emails
+    shelter = db.query(User).filter(User.id == cat.shelter_id).first()
+    shelter_email = shelter.email if shelter else "shelter@kizunapaws.com"
+    background_tasks.add_task(
+        EmailService.send_adoption_filed_email,
+        current_user.email,
+        current_user.name,
+        cat.name,
+        shelter_email
+    )
+    
     return request_loaded
 
 @router.post("/adoption-request/{request_id}/status", response_model=dict)
 def update_adoption_request_status(
     request_id: str,
+    background_tasks: BackgroundTasks,
     action: str = Form(...),  # approve, reject
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -97,6 +111,18 @@ def update_adoption_request_status(
         )
 
     db.commit()
+
+    # Trigger email notifications
+    adopter = db.query(User).filter(User.id == request.user_id).first()
+    if adopter and cat:
+        background_tasks.add_task(
+            EmailService.send_adoption_status_email,
+            adopter.email,
+            adopter.name,
+            cat.name,
+            request.status
+        )
+
     return {"message": f"Application status updated to {request.status}.", "request_id": request_id, "status": request.status}
 
 @router.get("/dashboard")

@@ -1,16 +1,17 @@
 import os
-from fastapi import APIRouter, Depends, HTTPException, status, Header
+from fastapi import APIRouter, Depends, HTTPException, status, Header, BackgroundTasks
 from sqlalchemy.orm import Session
 from backend.app.database.connection import get_db
 from backend.app.models.models import User
 from backend.app.schemas.schemas import UserResponse, UserCreate, UserLogin
 from backend.app.services.auth_utils import hash_password, verify_password, create_access_token, decode_access_token
+from backend.app.services.email_service import EmailService
 from typing import Optional
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 @router.post("/signup", response_model=UserResponse)
-def signup(user_data: UserCreate, db: Session = Depends(get_db)):
+def signup(user_data: UserCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """Registers a new adopter or shelter user with hashed passwords."""
     existing_user = db.query(User).filter(User.email == user_data.email).first()
     if existing_user:
@@ -31,6 +32,9 @@ def signup(user_data: UserCreate, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    
+    background_tasks.add_task(EmailService.send_welcome_email, new_user.email, new_user.name, new_user.role)
+    
     return new_user
 
 @router.post("/login", response_model=dict)
