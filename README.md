@@ -87,8 +87,8 @@ Purrfect Match AI shifts the focus from **appearance to compatibility** and expa
                             [Behaviour Logs]
 ```
 
-- **`users`**: `id` (PK), `name`, `email`, `role` (adopter/shelter/admin), `address`, `phone`, `created_at`
-- **`cats`**: `id` (PK), `name`, `age`, `breed`, `gender`, `description`, `image_url`, `shelter_id`, `owner_id` (FK), `status` (available/passed_away/transferred/active)
+- **`users`**: `id` (PK), `name`, `email`, `role` (adopter/shelter/admin), `address`, `phone`, `reset_code` (temp reset token), `created_at`
+- **`cats`**: `id` (PK), `name`, `age`, `breed`, `gender`, `description`, `image_url`, `shelter_id` (FK to Users), `owner_id` (FK to Users), `status` (available/passed_away/transferred/active), `created_at`
 - **`personality_profiles`**: `cat_id` (PK, FK), `playfulness`, `curiosity`, `energy`, `confidence`, `friendliness`, `independence`, `explanation`
 - **`questionnaires`**: `user_id` (PK, FK), `house_type`, `kids` (bool), `other_pets` (bool), `experience`, `working_hours`, `preferred_traits`, `play_budget`, `vocal_tolerance`, `grooming_preference`, `ideal_description`
 - **`matches`**: `user_id` (PK, FK), `cat_id` (PK, FK), `compatibility` (float), `reasons`
@@ -102,6 +102,8 @@ Purrfect Match AI shifts the focus from **appearance to compatibility** and expa
 | :--- | :--- | :--- | :--- |
 | **POST** | `/auth/signup` | Register a new adopter, shelter, or admin user. | No |
 | **POST** | `/auth/login` | Simple login using email and password context. | No |
+| **POST** | `/auth/forgot-password` | Generate a 6-digit verification reset code and email it. | No |
+| **POST** | `/auth/reset-password` | Validate reset code and set a new password. | No |
 | **GET** | `/cats/` | List all available cats with automatic compatibility scores. | Yes |
 | **GET** | `/cats/{id}` | Retrieve single cat profile and detailed personality traits. | Yes |
 | **POST** | `/cats/` | Register a new cat with image upload (Restricted to Shelter/Admin). | Yes |
@@ -111,6 +113,7 @@ Purrfect Match AI shifts the focus from **appearance to compatibility** and expa
 | **POST** | `/adoption-request` | File an application to adopt a companion. | Yes |
 | **POST** | `/adoption-request/{id}/status`| Approve or reject pending applications. | Yes |
 | **POST** | `/behaviour-analysis` | Upload video/image to perform behavior and mood parsing. | Yes |
+| **POST** | `/ai/chat` | Chat with Feline behaviorist advisor (supports attachments). | No |
 | **GET** | `/users/profile` | Retrieve the authenticated user's profile details. | Yes |
 | **PUT** | `/users/profile` | Update user name, address, and phone numbers. | Yes |
 | **POST** | `/users/pets` | Register a personal custom pet with image upload. | Yes |
