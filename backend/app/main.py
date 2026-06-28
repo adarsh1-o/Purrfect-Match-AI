@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from backend.app.database.connection import engine, Base
 from backend.app.database.seed import seed_db
-from backend.app.routers import auth, cats, matching, behaviour, adoption, users
+from backend.app.routers import auth, cats, matching, behaviour, adoption, users, ai_chat
 
 # Setup logging
 logging.basicConfig(
@@ -71,6 +71,7 @@ app.include_router(matching.router)
 app.include_router(behaviour.router)
 app.include_router(adoption.router)
 app.include_router(users.router)
+app.include_router(ai_chat.router)
 
 @app.get("/")
 def read_root():

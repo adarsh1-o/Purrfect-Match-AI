@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchDashboardData, uploadBehaviourMedia } from "@/lib/api";
+import { fetchDashboardData, uploadBehaviourMedia, sendChatQuery } from "@/lib/api";
 import { ShieldCheck, Video, LayoutDashboard, Sparkles, Smile, RefreshCw, ClipboardList, CheckCircle, Clock } from "lucide-react";
 import Link from "next/link";
 
@@ -15,6 +15,14 @@ export default function AdopterDashboard() {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
+
+  // Chatbot states
+  const [chatCatId, setChatCatId] = useState("");
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState<any[]>([
+    { sender: "ai", text: "Hello! I am your Kizuna AI Behavior Advisor. Ask me anything about general cat behavior, play schedules, or shyness traits!" }
+  ]);
+  const [chatLoading, setChatLoading] = useState(false);
 
   const loadDashboard = async () => {
     try {
@@ -56,6 +64,25 @@ export default function AdopterDashboard() {
       alert(err.message || "Media analysis failed.");
     } finally {
       setAnalyzing(false);
+    }
+  };
+
+  const handleChatSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+
+    const userMsg = chatInput.trim();
+    setChatMessages((prev) => [...prev, { sender: "user", text: userMsg }]);
+    setChatInput("");
+    setChatLoading(true);
+
+    try {
+      const response = await sendChatQuery(chatCatId || null, userMsg);
+      setChatMessages((prev) => [...prev, { sender: "ai", text: response.reply }]);
+    } catch (err: any) {
+      setChatMessages((prev) => [...prev, { sender: "ai", text: `Sorry, I encountered an error: ${err.message}` }]);
+    } finally {
+      setChatLoading(false);
     }
   };
 
@@ -292,6 +319,94 @@ export default function AdopterDashboard() {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Kizuna AI: Feline Behavior Advisor */}
+          <div className="glass-card rounded-2xl border border-neutral-800 p-6 space-y-4">
+            <h3 className="text-lg font-bold text-white mb-1 flex items-center space-x-2">
+              <Sparkles className="h-5 w-5 text-red-500" />
+              <span>Kizuna AI Advisor</span>
+            </h3>
+            <p className="text-[11px] text-neutral-400 leading-normal">
+              Ask our AI behaviorist anything about your cat's specific personality vectors, care needs, or behavior habits.
+            </p>
+
+            {/* Select Cat */}
+            <div>
+              <label className="block text-[9px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">
+                Select Cat Context
+              </label>
+              <select
+                value={chatCatId}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setChatCatId(val);
+                  
+                  // Reset greeting message based on context
+                  let catName = "general cat";
+                  if (val) {
+                    const matches = [...data.adopted_cats, ...data.active_requests.map((r: any) => r.cat)].filter((c: any) => c && c.id === val);
+                    if (matches.length > 0) catName = matches[0].name;
+                  }
+                  setChatMessages([
+                    { sender: "ai", text: `Hello! I am your Kizuna AI Behavior Advisor. Ask me anything about ${catName}'s behavior, play habits, or integration tips!` }
+                  ]);
+                }}
+                className="w-full py-2 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
+              >
+                <option value="">General Cat Advice (No Profile)</option>
+                {/* Adopted Cats */}
+                {data.adopted_cats.map((cat: any) => (
+                  <option key={cat.id} value={cat.id}>Adopted: {cat.name} ({cat.breed})</option>
+                ))}
+                {/* Matched / Requested Cats */}
+                {data.active_requests.map((req: any) => (
+                  req.cat && (
+                    <option key={req.cat.id} value={req.cat.id}>Applied: {req.cat.name} ({req.cat.breed})</option>
+                  )
+                ))}
+              </select>
+            </div>
+
+            {/* Chat Window */}
+            <div className="h-44 border border-neutral-900 bg-neutral-950/40 rounded-xl p-3 overflow-y-auto space-y-2.5 flex flex-col scrollbar-thin">
+              {chatMessages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  className={`max-w-[85%] rounded-xl px-3 py-2 text-xs leading-relaxed ${
+                    msg.sender === "user"
+                      ? "self-end bg-gradient-to-r from-red-650 to-red-555 text-white shadow-sm"
+                      : "self-start bg-neutral-900/80 text-neutral-300 border border-neutral-850"
+                  }`}
+                >
+                  {msg.text}
+                </div>
+              ))}
+              {chatLoading && (
+                <div className="self-start bg-neutral-900/80 text-neutral-500 border border-neutral-850 rounded-xl px-3 py-2 text-xs animate-pulse">
+                  Typing advice...
+                </div>
+              )}
+            </div>
+
+            {/* Input form */}
+            <form onSubmit={handleChatSubmit} className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Ask about shyness, scratching, diet..."
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                disabled={chatLoading}
+                className="flex-grow py-2 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
+              />
+              <button
+                type="submit"
+                disabled={chatLoading || !chatInput.trim()}
+                className="px-4 py-2 bg-gradient-to-r from-red-650 to-red-550 hover:from-red-550 hover:to-red-450 text-white font-bold rounded-md text-xs hover:shadow-md cursor-pointer disabled:opacity-50 transition-all active:scale-95"
+              >
+                Ask
+              </button>
+            </form>
           </div>
         </div>
       </div>

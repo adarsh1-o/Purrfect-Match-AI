@@ -286,3 +286,15 @@ export async function deleteCat(catId: string) {
   }
   return res.json();
 }
+
+export async function sendChatQuery(catId: string | null, message: string) {
+  const res = await fetch(`${API_BASE_URL}/ai/chat`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({ cat_id: catId, message }),
+  });
+  if (!res.ok) {
+    await throwApiError(res, "Failed to retrieve AI advice");
+  }
+  return res.json();
+}
