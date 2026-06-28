@@ -10,12 +10,18 @@ from backend.app.database.connection import engine, Base
 from backend.app.database.seed import seed_db
 from backend.app.routers import auth, cats, matching, behaviour, adoption, users, ai_chat
 
-# Setup logging
+# Setup logging with enhanced configuration
+log_level = os.getenv("LOG_LEVEL", "DEBUG" if os.getenv("DEBUG", "true").lower() == "true" else "INFO")
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+    level=getattr(logging, log_level),
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler("application.log", encoding="utf-8")
+    ]
 )
 logger = logging.getLogger("purrfect_match_ai")
+logger.info(f"Application logger initialized with level: {log_level}")
 
 # Initialize FastAPI App
 app = FastAPI(
