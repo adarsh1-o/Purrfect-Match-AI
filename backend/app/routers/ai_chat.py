@@ -31,8 +31,7 @@ class AIChatResponse(BaseModel):
 @router.post("/ai/chat", response_model=AIChatResponse)
 def get_ai_behavior_advice(
     data: AIChatRequest,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """
     Kizuna AI: Feline Behavior Advisor
