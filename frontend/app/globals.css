@@ -157,3 +157,14 @@ body {
   color: #4a3b37 !important;
 }
 
+/* Custom Wiggle Animation for Feline Chatbot */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-8deg); }
+  75% { transform: rotate(8deg); }
+}
+
+.group:hover .animate-wiggle {
+  animation: wiggle 0.3s ease-in-out infinite;
+}
+

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Sparkles, MessageCircle, X, Send, Paperclip } from "lucide-react";
+import { Sparkles, Cat, X, Send, Paperclip } from "lucide-react";
 import { sendChatQuery } from "@/lib/api";
 
 export default function FloatingChat() {
@@ -13,6 +13,7 @@ export default function FloatingChat() {
     { sender: "ai", text: "Hello! I am your Kizuna AI Behavior Advisor. Ask me anything about general cat behavior, play schedules, or shyness traits!" }
   ]);
   const [chatLoading, setChatLoading] = useState(false);
+  const [showPrompt, setShowPrompt] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Default featured cats matching seeded data ids or names
@@ -182,12 +183,40 @@ export default function FloatingChat() {
         </div>
       )}
 
+      {/* Speech Prompt Bubble */}
+      {showPrompt && !isOpen && (
+        <div className="absolute right-0 bottom-14 mb-2 bg-gradient-to-r from-red-650 to-red-550 border border-red-500/20 text-white rounded-2xl py-2 px-3 shadow-xl flex items-center gap-1.5 whitespace-nowrap animate-bounce z-50 text-[10px] font-bold">
+          <span>Chat with Kizuna AI! 🐾</span>
+          <button 
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowPrompt(false);
+            }} 
+            className="hover:bg-white/10 rounded-full p-0.5"
+          >
+            <X className="h-3 w-3" />
+          </button>
+        </div>
+      )}
+
       {/* Floating Toggle Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="h-12 w-12 rounded-full bg-gradient-to-r from-red-650 to-red-550 text-white shadow-xl hover:shadow-red-500/25 flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-all"
+        onClick={() => {
+          setIsOpen(!isOpen);
+          setShowPrompt(false);
+        }}
+        className="relative h-12 w-12 rounded-full bg-gradient-to-r from-red-650 to-red-550 text-white shadow-xl hover:shadow-red-500/25 flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-all group"
       >
-        {isOpen ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
+        {/* Cat Ears */}
+        {!isOpen && (
+          <>
+            <div className="absolute -top-1 left-1.5 h-3.5 w-3.5 bg-red-650 border-t border-l border-red-500/10 rounded-tl-full rounded-tr-sm rotate-12 transition-transform group-hover:-translate-y-0.5 group-hover:rotate-6 origin-bottom-right" />
+            <div className="absolute -top-1 right-1.5 h-3.5 w-3.5 bg-red-650 border-t border-r border-red-500/10 rounded-tr-full rounded-tl-sm -rotate-12 transition-transform group-hover:-translate-y-0.5 group-hover:-rotate-6 origin-bottom-left" />
+          </>
+        )}
+        
+        {isOpen ? <X className="h-5 w-5" /> : <Cat className="h-5.5 w-5.5 animate-wiggle group-hover:scale-110" />}
       </button>
     </div>
   );
