@@ -10,7 +10,7 @@ services:
     environment:
       - DATABASE_URL=sqlite:///./purrfect_match.db
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
-      - GEMINI_MODEL=gemini-1.5-flash
+      - GEMINI_MODEL=gemini-2.5-flash
     volumes:
       - backend_data:/app/data
 
