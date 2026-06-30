@@ -108,7 +108,7 @@ def get_ai_behavior_advice(
     if api_key and GEMINI_AVAILABLE:
         try:
             genai.configure(api_key=api_key)
-            model_name = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+            model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
             model = genai.GenerativeModel(model_name)
             
             prompt = f"""
@@ -175,6 +175,25 @@ def get_ai_behavior_advice(
             reply = f"Since {cat_name} is high-energy, puzzle feeders are excellent for slowing down their eating while providing mental stimulation. Keep their feeding schedule consistent."
         else:
             reply = f"Establish structured feeding times rather than free feeding. This will help you manage {cat_name}'s weight and maintain a strong routine."
+
+    # Help / Capabilities keywords
+    elif any(w in message_lower for w in ["help me", "what can you", "how can you help", "capabilities", "features", "what do you do"]):
+        reply = f"I can help you understand {cat_name}'s unique personality metrics (like energy, confidence, and playfulness). I can also advise on issues like hiding, scratching, biting, and diet. Feel free to upload a picture or video of them for visual diagnostics!" if cat else "I can help you evaluate general cat behavior, suggest play schedules, explain shyness traits, and advise on diet or scratching habits. You can also upload files for automated mood diagnostics!"
+
+    # Who are you / Identity
+    elif any(w in message_lower for w in ["who are you", "your name", "what is your name"]):
+        reply = "I am Kizuna AI, your feline behavioral specialist! I specialize in decoding cat habits, moods, and compatibility metrics."
+
+    # Greetings keywords
+    elif any(w in message_lower for w in ["hello", "hi", "hey", "greetings", "g'day", "yo"]):
+        if cat:
+            reply = f"Hello there! 🐾 I am ready to help you with {cat_name}. You can ask me about their play habits, shyness, or how to make them comfortable!"
+        else:
+            reply = "Hello! 🐾 I am your Kizuna AI Behavior Advisor. I'm here to help you understand feline behavior, play requirements, and body language. What's on your mind today?"
+
+    # Appreciation / Thanks
+    elif any(w in message_lower for w in ["thank", "thanks", "awesome", "great", "perfect", "good job"]):
+        reply = "You're very welcome! 🐾 Let me know if you have any other questions about keeping your cat happy and healthy."
 
     # General / Default response
     else:

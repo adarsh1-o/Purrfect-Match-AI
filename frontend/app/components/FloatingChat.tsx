@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Sparkles, Cat, X, Send, Paperclip } from "lucide-react";
+import { Sparkles, Cat, X, Send, Paperclip, Minus, Maximize2, Minimize2 } from "lucide-react";
 import { sendChatQuery } from "@/lib/api";
 
 export default function FloatingChat() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(false);
   const [chatCatId, setChatCatId] = useState("");
   const [chatInput, setChatInput] = useState("");
   const [chatFile, setChatFile] = useState<File | null>(null);
@@ -62,124 +64,181 @@ export default function FloatingChat() {
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
       {/* Chat Window */}
       {isOpen && (
-        <div className="mb-4 w-80 sm:w-96 rounded-2xl border border-neutral-850 bg-neutral-950/95 shadow-2xl overflow-hidden flex flex-col z-50 animate-slide-up backdrop-blur-md">
+        <div 
+          className={`mb-4 rounded-2xl border border-neutral-850 bg-neutral-950/95 shadow-2xl overflow-hidden flex flex-col z-50 animate-slide-up backdrop-blur-md transition-all duration-300 ${
+            isMaximized 
+              ? "fixed inset-4 sm:inset-10 w-auto h-auto max-w-none mb-0" 
+              : isMinimized 
+                ? "w-64 h-12 mb-4" 
+                : "w-80 sm:w-96 h-[400px] mb-4"
+          }`}
+        >
           {/* Header */}
-          <div className="p-4 bg-gradient-to-r from-red-650 to-red-550 flex items-center justify-between">
+          <div 
+            className="p-4 bg-gradient-to-r from-red-650 to-red-550 flex items-center justify-between cursor-pointer select-none"
+            onClick={() => isMinimized && setIsMinimized(false)}
+          >
             <div className="flex items-center space-x-2">
               <Sparkles className="h-4 w-4 text-white fill-white animate-pulse" />
               <div>
-                <h4 className="text-xs font-bold text-white leading-none">Kizuna AI Advisor</h4>
-                <span className="text-[9px] text-red-100 mt-0.5 block">Feline Behavior Specialist</span>
+                <h4 className="text-xs font-bold text-white leading-none">
+                  Kizuna AI Advisor {isMinimized && "(Minimized)"}
+                </h4>
+                {!isMinimized && (
+                  <span className="text-[9px] text-red-100 mt-0.5 block">Feline Behavior Specialist</span>
+                )}
               </div>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="p-1 rounded-full text-red-100 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-
-          {/* Selector Dropdown */}
-          <div className="px-4 py-2 border-b border-neutral-900 bg-neutral-900/40">
-            <select
-              value={chatCatId}
-              onChange={(e) => {
-                const val = e.target.value;
-                setChatCatId(val);
-                
-                let catName = "general cat";
-                if (val) {
-                  const match = featuredCats.find((c) => c.id === val);
-                  if (match) catName = match.name.split(" ")[0];
-                }
-                
-                setChatMessages([
-                  { sender: "ai", text: `Hello! I am your Kizuna AI Behavior Advisor. Ask me anything about ${catName}'s behavior, play habits, or integration tips!` }
-                ]);
-              }}
-              className="w-full py-1.5 px-2.5 bg-neutral-950 border border-neutral-800 rounded-md text-[10px] text-neutral-300 focus:outline-none focus:border-red-500"
-            >
-              <option value="">General Cat Advice (No Profile)</option>
-              {featuredCats.map((cat) => (
-                <option key={cat.id} value={cat.id}>Featured: {cat.name}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Chat Window */}
-          <div
-            ref={scrollRef}
-            className="h-64 overflow-y-auto p-4 space-y-3 flex flex-col bg-neutral-950/40 scrollbar-thin"
-          >
-            {chatMessages.map((msg, idx) => (
-              <div
-                key={idx}
-                className={`max-w-[85%] rounded-xl px-3 py-2 text-xs leading-relaxed ${
-                  msg.sender === "user"
-                    ? "self-end bg-gradient-to-r from-red-650 to-red-550 text-white shadow-sm"
-                    : "self-start bg-neutral-900/80 text-neutral-300 border border-neutral-850"
-                }`}
-              >
-                {msg.text}
-              </div>
-            ))}
-            {chatLoading && (
-              <div className="self-start bg-neutral-900/80 text-neutral-500 border border-neutral-850 rounded-xl px-3 py-2 text-xs animate-pulse">
-                Thinking...
-              </div>
-            )}
-          </div>
-
-          {/* Selected File Preview Badge */}
-          {chatFile && (
-            <div className="mx-4 p-2 mb-2 rounded bg-neutral-900 border border-neutral-850 text-[10px] text-neutral-400 flex items-center justify-between">
-              <span className="truncate max-w-[80%] flex items-center gap-1 font-mono">
-                <Paperclip className="h-3.5 w-3.5 text-red-500 shrink-0" />
-                {chatFile.name}
-              </span>
+            
+            <div className="flex items-center space-x-1.5" onClick={(e) => e.stopPropagation()}>
+              {/* Minimize/Restore Toggle Button */}
               <button
                 type="button"
-                onClick={() => setChatFile(null)}
-                className="text-red-555 hover:text-red-400 font-bold ml-1 cursor-pointer shrink-0"
+                onClick={() => {
+                  setIsMinimized(!isMinimized);
+                  if (isMaximized) setIsMaximized(false);
+                }}
+                className="p-1 rounded-full text-red-100 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                title={isMinimized ? "Restore" : "Minimize"}
               >
-                Remove
+                <Minus className="h-3.5 w-3.5" />
+              </button>
+
+              {/* Fullscreen Toggle Button (Disabled when minimized) */}
+              {!isMinimized && (
+                <button
+                  type="button"
+                  onClick={() => setIsMaximized(!isMaximized)}
+                  className="p-1 rounded-full text-red-100 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                  title={isMaximized ? "Exit Fullscreen" : "Fullscreen"}
+                >
+                  {isMaximized ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+                </button>
+              )}
+
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false);
+                  setIsMaximized(false);
+                  setIsMinimized(false);
+                }}
+                className="p-1 rounded-full text-red-100 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                title="Close"
+              >
+                <X className="h-3.5 w-3.5" />
               </button>
             </div>
+          </div>
+
+          {/* Hidden layout elements when minimized */}
+          {!isMinimized && (
+            <>
+              {/* Selector Dropdown */}
+              <div className="px-4 py-2 border-b border-neutral-900 bg-neutral-900/40">
+                <select
+                  value={chatCatId}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setChatCatId(val);
+                    
+                    let catName = "general cat";
+                    if (val) {
+                      const match = featuredCats.find((c) => c.id === val);
+                      if (match) catName = match.name.split(" ")[0];
+                    }
+                    
+                    setChatMessages([
+                      { sender: "ai", text: `Hello! I am your Kizuna AI Behavior Advisor. Ask me anything about ${catName}'s behavior, play habits, or integration tips!` }
+                    ]);
+                  }}
+                  className="w-full py-1.5 px-2.5 bg-neutral-950 border border-neutral-800 rounded-md text-[10px] text-neutral-300 focus:outline-none focus:border-red-500"
+                >
+                  <option value="">General Cat Advice (No Profile)</option>
+                  {featuredCats.map((cat) => (
+                    <option key={cat.id} value={cat.id}>Featured: {cat.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Chat Window */}
+              <div
+                ref={scrollRef}
+                className={`overflow-y-auto p-4 space-y-3 flex flex-col bg-neutral-950/40 scrollbar-thin ${
+                  isMaximized ? "flex-grow h-auto" : "h-64"
+                }`}
+              >
+                {chatMessages.map((msg, idx) => (
+                  <div
+                    key={idx}
+                    className={`max-w-[85%] rounded-xl px-3 py-2 text-xs leading-relaxed ${
+                      msg.sender === "user"
+                        ? "self-end bg-gradient-to-r from-red-650 to-red-550 text-white shadow-sm"
+                        : "self-start bg-neutral-900/80 text-neutral-300 border border-neutral-850"
+                    }`}
+                  >
+                    {msg.text}
+                  </div>
+                ))}
+                {chatLoading && (
+                  <div className="self-start bg-neutral-900/80 text-neutral-500 border border-neutral-850 rounded-xl px-3 py-2 text-xs animate-pulse">
+                    Thinking...
+                  </div>
+                )}
+              </div>
+
+              {/* Selected File Preview Badge */}
+              {chatFile && (
+                <div className="mx-4 p-2 mb-2 rounded bg-neutral-900 border border-neutral-850 text-[10px] text-neutral-400 flex items-center justify-between">
+                  <span className="truncate max-w-[80%] flex items-center gap-1 font-mono">
+                    <Paperclip className="h-3.5 w-3.5 text-red-500 shrink-0" />
+                    {chatFile.name}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setChatFile(null)}
+                    className="text-red-555 hover:text-red-400 font-bold ml-1 cursor-pointer shrink-0"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+
+              {/* Footer Input */}
+              <form onSubmit={handleChatSubmit} className="p-3 border-t border-neutral-900 flex gap-2 bg-neutral-950/60 items-center">
+                <label className="p-2 border border-neutral-800 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-400 hover:text-white rounded-md cursor-pointer transition-colors relative shrink-0 flex items-center justify-center">
+                  <input
+                    type="file"
+                    accept="image/*,video/*"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files.length > 0) {
+                        setChatFile(e.target.files[0]);
+                      }
+                    }}
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                  />
+                  <Paperclip className="h-3.5 w-3.5" />
+                </label>
+
+                <input
+                  type="text"
+                  placeholder="Ask advice or upload a video..."
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  disabled={chatLoading}
+                  className="flex-grow py-2 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
+                />
+                <button
+                  type="submit"
+                  disabled={chatLoading || (!chatInput.trim() && !chatFile)}
+                  className="p-2 bg-gradient-to-r from-red-650 to-red-550 text-white rounded-md hover:shadow-md cursor-pointer disabled:opacity-50 transition-all flex items-center justify-center shrink-0 active:scale-95"
+                >
+                  <Send className="h-3.5 w-3.5" />
+                </button>
+              </form>
+            </>
           )}
-
-          {/* Footer Input */}
-          <form onSubmit={handleChatSubmit} className="p-3 border-t border-neutral-900 flex gap-2 bg-neutral-950/60 items-center">
-            <label className="p-2 border border-neutral-800 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-400 hover:text-white rounded-md cursor-pointer transition-colors relative shrink-0 flex items-center justify-center">
-              <input
-                type="file"
-                accept="image/*,video/*"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files.length > 0) {
-                    setChatFile(e.target.files[0]);
-                  }
-                }}
-                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-              />
-              <Paperclip className="h-3.5 w-3.5" />
-            </label>
-
-            <input
-              type="text"
-              placeholder="Ask advice or upload a video..."
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              disabled={chatLoading}
-              className="flex-grow py-2 px-3 bg-neutral-950 border border-neutral-800 rounded-md text-xs text-neutral-300 focus:outline-none focus:border-red-500"
-            />
-            <button
-              type="submit"
-              disabled={chatLoading || (!chatInput.trim() && !chatFile)}
-              className="p-2 bg-gradient-to-r from-red-650 to-red-550 text-white rounded-md hover:shadow-md cursor-pointer disabled:opacity-50 transition-all flex items-center justify-center shrink-0 active:scale-95"
-            >
-              <Send className="h-3.5 w-3.5" />
-            </button>
-          </form>
         </div>
       )}
 
@@ -203,20 +262,27 @@ export default function FloatingChat() {
       {/* Floating Toggle Button */}
       <button
         onClick={() => {
-          setIsOpen(!isOpen);
+          if (isOpen && isMinimized) {
+            // If it's open but minimized, clicking toggles restore
+            setIsMinimized(false);
+          } else {
+            setIsOpen(!isOpen);
+            setIsMinimized(false);
+            setIsMaximized(false);
+          }
           setShowPrompt(false);
         }}
         className="relative h-12 w-12 rounded-full bg-gradient-to-r from-red-650 to-red-550 text-white shadow-xl hover:shadow-red-500/25 flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-all group"
       >
         {/* Cat Ears */}
-        {!isOpen && (
+        {(!isOpen || isMinimized) && (
           <>
             <div className="absolute -top-1 left-1.5 h-3.5 w-3.5 bg-red-650 border-t border-l border-red-500/10 rounded-tl-full rounded-tr-sm rotate-12 transition-transform group-hover:-translate-y-0.5 group-hover:rotate-6 origin-bottom-right" />
             <div className="absolute -top-1 right-1.5 h-3.5 w-3.5 bg-red-650 border-t border-r border-red-500/10 rounded-tr-full rounded-tl-sm -rotate-12 transition-transform group-hover:-translate-y-0.5 group-hover:-rotate-6 origin-bottom-left" />
           </>
         )}
         
-        {isOpen ? <X className="h-5 w-5" /> : <Cat className="h-5.5 w-5.5 animate-wiggle group-hover:scale-110" />}
+        {isOpen && !isMinimized ? <X className="h-5 w-5" /> : <Cat className="h-5.5 w-5.5 animate-wiggle group-hover:scale-110" />}
       </button>
     </div>
   );
