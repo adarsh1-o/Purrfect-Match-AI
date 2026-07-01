@@ -78,8 +78,10 @@ export default function FloatingChat() {
           title: "Kizuna AI Behavior Advice",
           text: text,
         });
-      } catch (err) {
-        console.error("Error sharing message:", err);
+      } catch (err: any) {
+        if (err.name !== "AbortError" && err.name !== "NotAllowedError") {
+          console.error("Error sharing message:", err);
+        }
       }
     } else {
       // Fallback: copy and notify user
