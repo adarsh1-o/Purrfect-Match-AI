@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Sparkles, Cat, X, Send, Paperclip, Minus, Maximize2, Minimize2 } from "lucide-react";
+import { Sparkles, Cat, X, Send, Paperclip, Minus, Maximize2, Minimize2, Copy, Check, Share2 } from "lucide-react";
 import { sendChatQuery } from "@/lib/api";
 
 export default function FloatingChat() {
@@ -16,6 +16,7 @@ export default function FloatingChat() {
   ]);
   const [chatLoading, setChatLoading] = useState(false);
   const [showPrompt, setShowPrompt] = useState(true);
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Default featured cats matching seeded data ids or names
@@ -57,6 +58,37 @@ export default function FloatingChat() {
       setChatMessages((prev) => [...prev, { sender: "ai", text: `Sorry, I encountered an error: ${err.message}` }]);
     } finally {
       setChatLoading(false);
+    }
+  };
+
+  const handleCopyMessage = async (text: string, idx: number) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedIdx(idx);
+      setTimeout(() => setCopiedIdx(null), 2000);
+    } catch (err) {
+      console.error("Failed to copy message:", err);
+    }
+  };
+
+  const handleShareMessage = async (text: string) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Kizuna AI Behavior Advice",
+          text: text,
+        });
+      } catch (err) {
+        console.error("Error sharing message:", err);
+      }
+    } else {
+      // Fallback: copy and notify user
+      try {
+        await navigator.clipboard.writeText(text);
+        alert("Web sharing is not supported on this browser. The advice has been copied to your clipboard!");
+      } catch (err) {
+        console.error("Fallback copy failed:", err);
+      }
     }
   };
 
@@ -172,13 +204,47 @@ export default function FloatingChat() {
                 {chatMessages.map((msg, idx) => (
                   <div
                     key={idx}
-                    className={`max-w-[85%] rounded-xl px-3 py-2 text-xs leading-relaxed ${
+                    className={`relative max-w-[85%] rounded-xl px-3 py-2.5 text-xs leading-relaxed group transition-all ${
                       msg.sender === "user"
                         ? "self-end bg-gradient-to-r from-red-650 to-red-550 text-white shadow-sm"
                         : "self-start bg-neutral-900/80 text-neutral-300 border border-neutral-850"
                     }`}
                   >
-                    {msg.text}
+                    <div className="pr-4 select-text">{msg.text}</div>
+                    
+                    {/* Hover copy and share buttons */}
+                    <div className={`mt-2 flex items-center gap-3 border-t pt-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] ${
+                      msg.sender === "user" ? "border-white/10 text-red-150" : "border-neutral-800 text-neutral-500"
+                    }`}>
+                      <button
+                        type="button"
+                        onClick={() => handleCopyMessage(msg.text, idx)}
+                        className="flex items-center gap-1 hover:text-white transition-colors cursor-pointer"
+                        title="Copy text"
+                      >
+                        {copiedIdx === idx ? (
+                          <>
+                            <Check className="h-3 w-3 text-green-400" />
+                            <span className="text-green-400">Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="h-3 w-3" />
+                            <span>Copy</span>
+                          </>
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleShareMessage(msg.text)}
+                        className="flex items-center gap-1 hover:text-white transition-colors cursor-pointer"
+                        title="Share advice"
+                      >
+                        <Share2 className="h-3 w-3" />
+                        <span>Share</span>
+                      </button>
+                    </div>
                   </div>
                 ))}
                 {chatLoading && (
@@ -263,7 +329,6 @@ export default function FloatingChat() {
       <button
         onClick={() => {
           if (isOpen && isMinimized) {
-            // If it's open but minimized, clicking toggles restore
             setIsMinimized(false);
           } else {
             setIsOpen(!isOpen);
