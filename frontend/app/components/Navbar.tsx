@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Heart, User, ClipboardList, LogOut, LayoutDashboard, Shield, Play, Activity, Sun, Moon } from "lucide-react";
+import { Heart, User, ClipboardList, LogOut, LayoutDashboard, Shield, Play, Activity, Sun, Moon, MapPin } from "lucide-react";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -93,6 +93,16 @@ export default function Navbar() {
           >
             <Activity className="mr-1.5 h-4 w-4" />
             AI Behavior Hub
+          </Link>
+
+          <Link
+            href="/directory"
+            className={`flex items-center px-3 py-2 rounded-md transition-colors ${
+              pathname === "/directory" ? "text-red-500" : "text-neutral-300 hover:text-white hover:bg-neutral-900"
+            }`}
+          >
+            <MapPin className="mr-1.5 h-4 w-4" />
+            Care Directory
           </Link>
 
           {role === "adopter" && (
