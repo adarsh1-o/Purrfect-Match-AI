@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { fetchDashboardData, uploadBehaviourMedia, sendChatQuery } from "@/lib/api";
-import { ShieldCheck, Video, LayoutDashboard, Sparkles, Smile, RefreshCw, ClipboardList, CheckCircle, Clock, Paperclip, Copy, Check, Share2 } from "lucide-react";
+import { ShieldCheck, Video, LayoutDashboard, Sparkles, Smile, RefreshCw, ClipboardList, CheckCircle, Clock, Paperclip, Copy, Check, Share2, Mic, MicOff, Cat } from "lucide-react";
 import Link from "next/link";
 
 export default function AdopterDashboard() {
@@ -125,6 +125,64 @@ export default function AdopterDashboard() {
       } catch (err) {
         console.error("Fallback copy failed:", err);
       }
+    }
+  };
+
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  const toggleVoiceInput = () => {
+    if (isRecording) {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      setIsRecording(false);
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Speech recognition is not supported in this browser. Please use Chrome or Safari.");
+      return;
+    }
+
+    try {
+      const rec = new SpeechRecognition();
+      rec.continuous = false;
+      rec.interimResults = false;
+      rec.lang = "en-US";
+      
+      rec.onstart = () => {
+        setIsRecording(true);
+      };
+
+      rec.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setChatInput((prev) => (prev ? prev + " " + transcript : transcript));
+      };
+
+      rec.onend = () => {
+        setIsRecording(false);
+      };
+
+      rec.onerror = (err: any) => {
+        console.error("Speech recognition error:", err);
+        setIsRecording(false);
+      };
+
+      recognitionRef.current = rec;
+      rec.start();
+    } catch (err) {
+      console.error("Failed to start speech recognition:", err);
+      setIsRecording(false);
     }
   };
 
@@ -459,8 +517,19 @@ export default function AdopterDashboard() {
                 </div>
               ))}
               {chatLoading && (
-                <div className="self-start bg-neutral-900/80 text-neutral-500 border border-neutral-850 rounded-xl px-3 py-2 text-xs animate-pulse">
-                  Typing advice...
+                <div className="self-start bg-neutral-900/80 border border-neutral-850 rounded-xl px-4 py-2.5 flex items-center space-x-3 text-xs text-neutral-400 shadow-inner">
+                  <div className="relative flex items-center justify-center">
+                    <Cat className="h-4 w-4 text-red-500 fill-red-500 animate-pulse" />
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-20 animate-ping" />
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <span className="text-neutral-450 font-medium">Kizuna is thinking</span>
+                    <span className="flex space-x-1 ml-1.5 items-center">
+                      <span className="h-1.5 w-1.5 bg-red-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                      <span className="h-1.5 w-1.5 bg-red-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                      <span className="h-1.5 w-1.5 bg-red-500 rounded-full animate-bounce" />
+                    </span>
+                  </div>
                 </div>
               )}
             </div>
@@ -484,7 +553,7 @@ export default function AdopterDashboard() {
 
             {/* Input form */}
             <form onSubmit={handleChatSubmit} className="flex gap-2 items-center">
-              <label className="p-2 border border-neutral-800 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-400 hover:text-white rounded-md cursor-pointer transition-colors relative shrink-0 flex items-center justify-center">
+              <label className="p-2 border border-neutral-800 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-400 hover:text-white rounded-md cursor-pointer transition-colors relative shrink-0 flex items-center justify-center" title="Upload media">
                 <input
                   type="file"
                   accept="image/*,video/*"
@@ -498,9 +567,23 @@ export default function AdopterDashboard() {
                 <Paperclip className="h-3.5 w-3.5" />
               </label>
 
+              {/* Voice Input Microphone Button */}
+              <button
+                type="button"
+                onClick={toggleVoiceInput}
+                className={`p-2 border rounded-md cursor-pointer transition-all shrink-0 flex items-center justify-center ${
+                  isRecording 
+                    ? "border-red-500 bg-red-950/40 text-red-500 animate-pulse" 
+                    : "border-neutral-800 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-400 hover:text-white"
+                }`}
+                title={isRecording ? "Stop recording" : "Voice input"}
+              >
+                {isRecording ? <MicOff className="h-3.5 w-3.5" /> : <Mic className="h-3.5 w-3.5" />}
+              </button>
+
               <input
                 type="text"
-                placeholder="Ask advice or upload a video..."
+                placeholder={isRecording ? "Listening..." : "Ask advice or upload a video..."}
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 disabled={chatLoading}
