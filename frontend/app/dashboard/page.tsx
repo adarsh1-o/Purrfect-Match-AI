@@ -215,18 +215,36 @@ export default function AdopterDashboard() {
     <div className="relative flex-grow py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full z-10">
       <div className="glow-bg" />
 
-      {/* Dashboard Top Cockpit */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-10 border-b border-neutral-900 pb-6">
-        <div>
-          <h1 className="text-3xl font-extrabold text-white">Adopter Cockpit</h1>
-          <p className="text-xs text-neutral-400 mt-1">Logged in as {data.user?.name} ({data.user?.email})</p>
+      {/* Dashboard Top Cockpit / Welcome Card */}
+      <div className="glass-card rounded-2xl border border-neutral-800 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 mb-10 relative overflow-hidden shadow-xl">
+        {/* Glow background behind the card */}
+        <div className="absolute -left-16 -top-16 w-32 h-32 bg-red-500/10 rounded-full blur-2xl animate-pulse" />
+        
+        <div className="flex flex-col md:flex-row items-center gap-6 relative z-10 text-center md:text-left w-full md:w-auto">
+          <div className="relative group shrink-0">
+            <div className="absolute inset-0 bg-red-500/20 blur-md rounded-full scale-75 group-hover:scale-90 transition-transform duration-500" />
+            <img
+              src="/logo.png"
+              alt="Purrfect Match Logo"
+              className="relative h-16 w-16 md:h-20 md:w-20 rounded-2xl border border-neutral-800 bg-neutral-950 p-2 shadow-2xl transition-all duration-500 group-hover:scale-105 group-hover:border-red-500/30"
+            />
+          </div>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-white">Adopter Cockpit</h1>
+            <p className="text-xs md:text-sm text-neutral-400 mt-1.5 leading-normal">
+              Welcome back, <span className="font-semibold text-white">{data.user?.name}</span> ({data.user?.email})
+            </p>
+          </div>
         </div>
-        <Link
-          href="/browse"
-          className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-850 text-white font-semibold rounded-lg text-xs transition-colors"
-        >
-          Find More Companions
-        </Link>
+        
+        <div className="relative z-10 w-full md:w-auto flex justify-center md:justify-end">
+          <Link
+            href="/browse"
+            className="w-full md:w-auto px-5 py-2.5 bg-gradient-to-r from-red-650 to-red-555 hover:from-red-555 hover:to-red-455 text-white font-bold rounded-lg text-xs text-center transition-all duration-200 shadow-md shadow-red-600/10 cursor-pointer"
+          >
+            Find More Companions
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

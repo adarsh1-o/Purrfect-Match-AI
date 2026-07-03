@@ -27,13 +27,25 @@ export default function Home() {
       {/* Background glow overlay */}
       <div className="glow-bg" />
 
-      {/* Hero Content */}
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="max-w-4xl text-center z-10 flex flex-col items-center"
       >
+        <motion.div
+          variants={itemVariants}
+          className="mb-8 relative group"
+        >
+          {/* Subtle glowing halo behind the logo */}
+          <div className="absolute inset-0 bg-red-500/20 blur-2xl rounded-full scale-75 group-hover:scale-90 transition-transform duration-500" />
+          <img
+            src="/logo.png"
+            alt="Purrfect Match AI Logo"
+            className="relative h-28 w-28 md:h-32 md:w-32 rounded-3xl border border-neutral-800 bg-neutral-950 p-2 shadow-2xl transition-all duration-500 group-hover:scale-105 group-hover:border-red-500/30"
+          />
+        </motion.div>
+
         <motion.div
           variants={itemVariants}
           className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full border border-red-500/25 bg-red-950/20 text-xs font-semibold text-red-400 mb-8"

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Heart, User, ClipboardList, LogOut, LayoutDashboard, Shield, Play, Activity, Sun, Moon } from "lucide-react";
+import { User, ClipboardList, LogOut, LayoutDashboard, Shield, Play, Activity, Sun, Moon } from "lucide-react";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -59,7 +59,11 @@ export default function Navbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2 group">
-          <Heart className="h-6 w-6 text-red-500 fill-red-500 group-hover:scale-110 transition-transform duration-300" />
+          <img
+            src="/logo.png"
+            alt="Purrfect Match Logo"
+            className="h-7 w-7 rounded-full object-cover group-hover:scale-110 transition-transform duration-300"
+          />
           <span className="font-bold text-xl tracking-tight text-white">
             Purrfect Match<span className="text-red-500">.ai</span>
           </span>

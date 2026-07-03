@@ -184,7 +184,15 @@ export default function AuthPage() {
             </div>
 
             <div className="p-8 space-y-6">
-              <div className="text-center">
+              <div className="flex flex-col items-center text-center">
+                <div className="relative group mb-4">
+                  <div className="absolute inset-0 bg-red-500/20 blur-xl rounded-full scale-75 group-hover:scale-95 transition-transform duration-500" />
+                  <img
+                    src="/logo.png"
+                    alt="Purrfect Match Logo"
+                    className="relative h-20 w-20 rounded-2xl border border-neutral-800 bg-neutral-950 p-2 shadow-2xl transition-all duration-500 group-hover:scale-105 group-hover:border-red-500/30"
+                  />
+                </div>
                 <h2 className="text-xl font-extrabold text-white">
                   {isLogin ? "Welcome Back to Paws" : "Join the Kizuna Paws Network"}
                 </h2>
