@@ -62,7 +62,12 @@ export default function Navbar() {
           <img
             src="/logo.png"
             alt="Purrfect Match Logo"
-            className="h-7 w-7 rounded-full object-cover group-hover:scale-110 transition-transform duration-300"
+            className="theme-logo-dark-mode h-7 w-7 rounded-full object-cover group-hover:scale-110 transition-transform duration-300"
+          />
+          <img
+            src="/logo-dark.png"
+            alt="Purrfect Match Logo"
+            className="theme-logo-light-mode h-7 w-7 rounded-full object-cover group-hover:scale-110 transition-transform duration-300"
           />
           <span className="font-bold text-xl tracking-tight text-white">
             Purrfect Match<span className="text-red-500">.ai</span>

@@ -168,3 +168,17 @@ body {
   animation: wiggle 0.3s ease-in-out infinite;
 }
 
+/* Logo Swap between Light and Dark mode */
+.theme-logo-dark-mode {
+  display: block !important;
+}
+.theme-logo-light-mode {
+  display: none !important;
+}
+
+.light .theme-logo-dark-mode {
+  display: none !important;
+}
+.light .theme-logo-light-mode {
+  display: block !important;
+}

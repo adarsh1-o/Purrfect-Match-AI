@@ -190,7 +190,12 @@ export default function AuthPage() {
                   <img
                     src="/logo.png"
                     alt="Purrfect Match Logo"
-                    className="relative h-20 w-20 rounded-2xl border border-neutral-800 bg-neutral-950 p-2 shadow-2xl transition-all duration-500 group-hover:scale-105 group-hover:border-red-500/30"
+                    className="theme-logo-dark-mode relative h-20 w-20 rounded-2xl border border-neutral-800 bg-neutral-950 p-2 shadow-2xl transition-all duration-500 group-hover:scale-105 group-hover:border-red-500/30"
+                  />
+                  <img
+                    src="/logo-dark.png"
+                    alt="Purrfect Match Logo"
+                    className="theme-logo-light-mode relative h-20 w-20 rounded-2xl border border-neutral-800 bg-neutral-950 p-2 shadow-2xl transition-all duration-500 group-hover:scale-105 group-hover:border-red-500/30"
                   />
                 </div>
                 <h2 className="text-xl font-extrabold text-white">
