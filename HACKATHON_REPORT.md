@@ -35,12 +35,19 @@ Owners upload video clips of their cats to analyze behavioral moods.
 ### 3. Kizuna AI: Behaviorist Chatbot (General & Profile-Specific)
 A global floating chatbot button styled with custom cat ears, a wiggling hover effect, and a pulsing meow speech bubble.
 * **The Magic**: Accepts optional photo/video uploads and uses the AI vision diagnostics pipeline to answer questions about any cat. Adopters can link the chat to their specific adopted cat to pull profile-tailored care advice.
+* **Voice Speech-to-Text**: Integrates a microphone toggle using the native browser Web Speech API. Users can speak their questions, and the speech-to-text engine translates and buffers the input directly into the chat box.
+* **🐾 Bouncing Paw Typing Indicator**: Replaces standard text loaders with a custom glassmorphic container featuring a pulsing red Lucide `Cat` icon, a surrounding ripple ring wave (`animate-ping`), and three bouncing dots with offset delays to create a smooth typing feedback wave.
 
 ### 4. Shelter Partner Directory
 A comprehensive catalog listing all registered shelters, their location coordinates, emails, phone numbers, and available cats, visible directly on the adopter's dashboard.
 
 ### 5. Placed Adopters Log
 A dashboard section for shelter managers listing all adopters who successfully approved and adopted companions from their facility, detailing contact emails, phones, and addresses.
+
+### 6. Premium UI Branding & Watermarks
+* **Embosed Parallax Watermark**: The landing page hero section features a centered, viewport-fixed transparent line art of the custom cat-heart logo (`line-art-dark.png` / `line-art-light.png`). It remains locked to the center of the viewport with a faint `opacity-[0.06]`, letting webpage content scroll dynamically over it for a parallax feel.
+* **Dynamic Theme Logo-Swap**: Controls logo visibility automatically based on the document theme. It renders `/logo.png` (white background) on dark themes, and `/logo-dark.png` (black background with glowing lines) on light themes to guarantee high contrast.
+* **Crisp Tab Favicon**: Features an icon.png processed using a custom Python script that boosts contrast and programmatically darkens line art pixels 5x to ensure it looks solid black and extremely crisp in browser tabs.
 
 ---
 

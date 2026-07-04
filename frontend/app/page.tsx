@@ -27,54 +27,71 @@ export default function Home() {
       {/* Background glow overlay */}
       <div className="glow-bg" />
 
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="max-w-4xl text-center z-10 flex flex-col items-center"
-      >
+      {/* Hero Wrapper with Watermark centered behind the Hero text */}
+      <div className="relative w-full max-w-4xl mx-auto flex flex-col items-center z-10">
+        {/* Embossed Watermark Background Logo */}
+        <div className="fixed inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden">
+          <img
+            src="/line-art-dark.png"
+            alt="Watermark Brand Logo"
+            className="theme-logo-dark-mode w-[500px] h-[500px] md:w-[650px] md:h-[650px] opacity-[0.06] mix-blend-screen scale-90 md:scale-100 transition-all duration-700"
+          />
+          <img
+            src="/line-art-light.png"
+            alt="Watermark Brand Logo"
+            className="theme-logo-light-mode w-[500px] h-[500px] md:w-[650px] md:h-[650px] opacity-[0.06] mix-blend-multiply scale-90 md:scale-100 transition-all duration-700"
+          />
+        </div>
+
         <motion.div
-          variants={itemVariants}
-          className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full border border-red-500/25 bg-red-950/20 text-xs font-semibold text-red-400 mb-8"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="max-w-4xl text-center z-10 flex flex-col items-center w-full"
         >
-          <Sparkles className="h-3.5 w-3.5" />
-          <span>Behavioral AI-Powered Cat Adoption Platform</span>
-        </motion.div>
-
-        <motion.h1
-          variants={itemVariants}
-          className="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-tight max-w-3xl"
-        >
-          People adopt cats based on appearance. We match on <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-amber-500">personality.</span>
-        </motion.h1>
-
-        <motion.p
-          variants={itemVariants}
-          className="mt-6 text-lg sm:text-xl text-neutral-300 max-w-2xl"
-        >
-          Every cat deserves the right human, and every human deserves the right companion. We build a lifelong bond starting from personality compatibility up to post-adoption care.
-        </motion.p>
-
-        {/* CTA Buttons */}
-        <motion.div
-          variants={itemVariants}
-          className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto"
-        >
-          <Link
-            href="/questionnaire"
-            className="flex items-center justify-center w-full sm:w-auto px-8 py-4 font-bold text-white bg-gradient-to-r from-red-600 to-red-500 rounded-lg hover:shadow-lg hover:shadow-red-500/20 active:scale-98 transition-all duration-200"
+          <motion.div
+            variants={itemVariants}
+            className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full border border-red-500/25 bg-red-950/20 text-xs font-semibold text-red-400 mb-8"
           >
-            <span>Take Personality Match Test</span>
-            <ChevronRight className="ml-2 h-5 w-5" />
-          </Link>
-          <Link
-            href="/browse"
-            className="flex items-center justify-center w-full sm:w-auto px-8 py-4 font-bold text-neutral-200 bg-neutral-900 border border-neutral-800 rounded-lg hover:bg-neutral-800 hover:text-white transition-colors"
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>Behavioral AI-Powered Cat Adoption Platform</span>
+          </motion.div>
+
+          <motion.h1
+            variants={itemVariants}
+            className="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-tight max-w-3xl"
           >
-            Browse Available Cats
-          </Link>
+            People adopt cats based on appearance. We match on <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-amber-500">personality.</span>
+          </motion.h1>
+
+          <motion.p
+            variants={itemVariants}
+            className="mt-6 text-lg sm:text-xl text-neutral-300 max-w-2xl"
+          >
+            Every cat deserves the right human, and every human deserves the right companion. We build a lifelong bond starting from personality compatibility up to post-adoption care.
+          </motion.p>
+
+          {/* CTA Buttons */}
+          <motion.div
+            variants={itemVariants}
+            className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto"
+          >
+            <Link
+              href="/questionnaire"
+              className="flex items-center justify-center w-full sm:w-auto px-8 py-4 font-bold text-white bg-gradient-to-r from-red-600 to-red-500 rounded-lg hover:shadow-lg hover:shadow-red-500/20 active:scale-98 transition-all duration-200 [.light_&]:from-red-200 [.light_&]:to-rose-300 [.light_&]:text-red-950 [.light_&]:hover:shadow-rose-300/30"
+            >
+              <span>Take Personality Match Test</span>
+              <ChevronRight className="ml-2 h-5 w-5" />
+            </Link>
+            <Link
+              href="/browse"
+              className="flex items-center justify-center w-full sm:w-auto px-8 py-4 font-bold text-neutral-200 bg-neutral-900 border border-neutral-800 rounded-lg hover:bg-neutral-800 hover:text-white transition-colors"
+            >
+              Browse Available Cats
+            </Link>
+          </motion.div>
         </motion.div>
-      </motion.div>
+      </div>
 
       {/* Philosophy Split Section */}
       <div className="w-full max-w-7xl mx-auto mt-32 grid grid-cols-1 md:grid-cols-2 gap-12 items-center px-4 sm:px-6 lg:px-8">
@@ -186,7 +203,7 @@ export default function Home() {
             </div>
             <Link
               href="/questionnaire"
-              className="mt-6 inline-flex items-center justify-center py-2 px-4 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg text-xs transition-colors cursor-pointer"
+              className="mt-6 inline-flex items-center justify-center py-2 px-4 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg text-xs transition-colors cursor-pointer [.light_&]:bg-red-200 [.light_&]:hover:bg-red-300 [.light_&]:text-red-950"
             >
               Start Compatibility Test
             </Link>

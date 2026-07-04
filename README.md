@@ -65,11 +65,16 @@ Purrfect Match AI shifts the focus from **appearance to compatibility** and expa
 
 ## 4. Technical Stack
 
-- **Frontend**: Next.js App Router (React, TypeScript, Tailwind CSS v4, Framer Motion, Lucide icons)
+- **Frontend**: Next.js App Router (React, TypeScript, Tailwind CSS v4, Framer Motion, Web Speech API integration, Lucide icons)
 - **Backend**: FastAPI (Python 3.11+, SQLAlchemy ORM)
 - **Database**: Supabase PostgreSQL (with a local zero-config SQLite fallback for sandbox execution)
 - **AI/ML**: OpenCV (headless frame extraction), Scikit-Learn (distance algorithms), google-generativeai (Gemini API)
 - **Deployment**: Multi-container Docker & Docker Compose configuration
+- **UX & Branding Features**:
+  * **Voice Input Speech-to-Text**: Hands-free voice interface for chatbot entries using Web Speech recognition.
+  * **Animated Typing Indicators**: Custom glassmorphic bouncing cat-paw loading indicator.
+  * **Theme Logo Swapping**: Dynamic high-contrast logo switching between light theme (`/logo-dark.png`) and dark theme (`/logo.png`).
+  * **Parallax Watermark**: Centered, viewport-fixed borderless cat line art watermark on the landing page.
 
 ---
 

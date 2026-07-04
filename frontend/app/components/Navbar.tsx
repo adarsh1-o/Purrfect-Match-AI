@@ -59,7 +59,16 @@ export default function Navbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2 group">
-          <Heart className="h-6 w-6 text-red-500 fill-red-500 group-hover:scale-110 transition-transform duration-300" />
+          <div className="relative h-6 w-6 group-hover:scale-110 transition-transform duration-300 flex items-center justify-center shrink-0">
+            {/* Red Heart Background */}
+            <Heart className="h-6 w-6 text-red-500 fill-red-500" />
+            {/* Overlay Cat Line Art inside the Heart */}
+            <img
+              src="/line-art-light.png"
+              alt="Heart Cat Logo"
+              className="absolute h-[13px] w-[13px] object-contain top-[5.5px] pointer-events-none select-none brightness-0 contrast-200"
+            />
+          </div>
           <span className="font-bold text-xl tracking-tight text-white">
             Purrfect Match<span className="text-red-500">.ai</span>
           </span>
