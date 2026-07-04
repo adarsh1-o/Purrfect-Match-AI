@@ -101,7 +101,7 @@ export default function Navbar() {
             }`}
           >
             <Activity className="mr-1.5 h-4 w-4" />
-            AI Behavior Hub
+            Post-Adoption Care
           </Link>
 
           {role === "adopter" && (

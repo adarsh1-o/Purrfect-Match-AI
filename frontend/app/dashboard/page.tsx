@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { fetchDashboardData, uploadBehaviourMedia, sendChatQuery } from "@/lib/api";
-import { ShieldCheck, Video, LayoutDashboard, Sparkles, Smile, RefreshCw, ClipboardList, CheckCircle, Clock, Paperclip, Copy, Check, Share2, Mic, MicOff, Cat } from "lucide-react";
+import { ShieldCheck, Video, LayoutDashboard, Sparkles, Smile, RefreshCw, ClipboardList, CheckCircle, Clock, Paperclip, Copy, Check, Share2, Mic, MicOff, Cat, Camera } from "lucide-react";
 import Link from "next/link";
 
 export default function AdopterDashboard() {
@@ -359,19 +359,41 @@ export default function AdopterDashboard() {
                   </select>
                 </div>
 
-                <div className="border-2 border-dashed border-neutral-800 hover:border-red-500/40 rounded-xl p-6 text-center cursor-pointer transition-colors relative">
-                  <input
-                    type="file"
-                    accept="image/*,video/*"
-                    onChange={handleFileChange}
-                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                  />
-                  <div className="space-y-2">
-                    <Video className="h-8 w-8 text-neutral-500 mx-auto" />
-                    <p className="text-xs text-neutral-400 font-semibold">
-                      {uploadFile ? uploadFile.name : "Drag and drop or browse files"}
-                    </p>
-                    <p className="text-[10px] text-neutral-500">Supports standard images and videos (MP4, AVI, JPG, PNG)</p>
+                {/* Split Upload Dropzone */}
+                <div className="flex gap-3">
+                  {/* File Selector */}
+                  <div className="flex-1 border-2 border-dashed border-neutral-800 hover:border-red-500/40 rounded-xl p-5 text-center cursor-pointer transition-colors relative">
+                    <input
+                      type="file"
+                      accept="image/*,video/*"
+                      onChange={handleFileChange}
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                    />
+                    <div className="space-y-1.5">
+                      <Video className="h-6 w-6 text-neutral-500 mx-auto" />
+                      <p className="text-xs text-neutral-400 font-semibold">
+                        {uploadFile ? uploadFile.name : "Choose File"}
+                      </p>
+                      <p className="text-[8px] text-neutral-500">From library</p>
+                    </div>
+                  </div>
+
+                  {/* Camera capture */}
+                  <div className="flex-1 border-2 border-dashed border-neutral-800 hover:border-red-500/40 rounded-xl p-5 text-center cursor-pointer transition-colors relative">
+                    <input
+                      type="file"
+                      accept="image/*,video/*"
+                      capture="environment"
+                      onChange={handleFileChange}
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                    />
+                    <div className="space-y-1.5">
+                      <Camera className="h-6 w-6 text-neutral-500 mx-auto" />
+                      <p className="text-xs text-neutral-400 font-semibold">
+                        {uploadFile ? uploadFile.name : "Use Camera"}
+                      </p>
+                      <p className="text-[8px] text-neutral-500">Take Photo/Video</p>
+                    </div>
                   </div>
                 </div>
 
@@ -576,7 +598,7 @@ export default function AdopterDashboard() {
 
             {/* Input form */}
             <form onSubmit={handleChatSubmit} className="flex gap-2 items-center">
-              <label className="p-2 border border-neutral-800 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-400 hover:text-white rounded-md cursor-pointer transition-colors relative shrink-0 flex items-center justify-center" title="Upload media">
+              <label className="p-2 border border-neutral-800 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-400 hover:text-white rounded-md cursor-pointer transition-colors relative shrink-0 flex items-center justify-center" title="Upload file">
                 <input
                   type="file"
                   accept="image/*,video/*"
@@ -588,6 +610,22 @@ export default function AdopterDashboard() {
                   className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                 />
                 <Paperclip className="h-3.5 w-3.5" />
+              </label>
+
+              {/* Chat Camera Option */}
+              <label className="p-2 border border-neutral-800 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-400 hover:text-white rounded-md cursor-pointer transition-colors relative shrink-0 flex items-center justify-center" title="Capture from camera">
+                <input
+                  type="file"
+                  accept="image/*,video/*"
+                  capture="environment"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      setChatFile(e.target.files[0]);
+                    }
+                  }}
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                />
+                <Camera className="h-3.5 w-3.5" />
               </label>
 
               {/* Voice Input Microphone Button */}

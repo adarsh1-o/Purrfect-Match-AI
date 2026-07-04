@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { uploadBehaviourMedia } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Video, RefreshCw, Smile, Heart, ClipboardCheck, Play } from "lucide-react";
+import { Sparkles, Video, RefreshCw, Smile, Heart, ClipboardCheck, Play, Camera } from "lucide-react";
 
 export default function BehaviourAnalysisHub() {
   const [catName, setCatName] = useState("");
@@ -99,20 +99,43 @@ export default function BehaviourAnalysisHub() {
                 />
               </div>
 
-              <div className="border-2 border-dashed border-neutral-800 hover:border-red-500/40 rounded-xl p-6 text-center cursor-pointer transition-colors relative">
-                <input
-                  type="file"
-                  required
-                  accept="image/*,video/*"
-                  onChange={handleFileChange}
-                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                />
-                <div className="space-y-2">
-                  <Video className="h-8 w-8 text-neutral-500 mx-auto" />
-                  <p className="text-xs text-neutral-400 font-semibold">
-                    {uploadFile ? uploadFile.name : "Drag and drop or browse files"}
-                  </p>
-                  <p className="text-[9px] text-neutral-500">Supports standard pictures and video files</p>
+              {/* Split Upload Dropzone */}
+              <div className="flex gap-3">
+                {/* File Selector */}
+                <div className="flex-1 border-2 border-dashed border-neutral-800 hover:border-red-500/40 rounded-xl p-5 text-center cursor-pointer transition-colors relative">
+                  <input
+                    type="file"
+                    required
+                    accept="image/*,video/*"
+                    onChange={handleFileChange}
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                  />
+                  <div className="space-y-1.5">
+                    <Video className="h-6 w-6 text-neutral-500 mx-auto" />
+                    <p className="text-xs text-neutral-400 font-semibold">
+                      {uploadFile ? uploadFile.name : "Choose File"}
+                    </p>
+                    <p className="text-[8px] text-neutral-500">From library</p>
+                  </div>
+                </div>
+
+                {/* Camera capture */}
+                <div className="flex-1 border-2 border-dashed border-neutral-800 hover:border-red-500/40 rounded-xl p-5 text-center cursor-pointer transition-colors relative">
+                  <input
+                    type="file"
+                    required
+                    accept="image/*,video/*"
+                    capture="environment"
+                    onChange={handleFileChange}
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                  />
+                  <div className="space-y-1.5">
+                    <Camera className="h-6 w-6 text-neutral-500 mx-auto" />
+                    <p className="text-xs text-neutral-400 font-semibold">
+                      {uploadFile ? uploadFile.name : "Use Camera"}
+                    </p>
+                    <p className="text-[8px] text-neutral-500">Take Photo/Video</p>
+                  </div>
                 </div>
               </div>
 

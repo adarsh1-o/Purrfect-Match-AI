@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Sparkles, Cat, X, Send, Paperclip, Minus, Maximize2, Minimize2, Copy, Check, Share2, Mic, MicOff } from "lucide-react";
+import { Sparkles, Cat, X, Send, Paperclip, Camera, Minus, Maximize2, Minimize2, Copy, Check, Share2, Mic, MicOff } from "lucide-react";
 import { sendChatQuery } from "@/lib/api";
 
 export default function FloatingChat() {
@@ -344,7 +344,7 @@ export default function FloatingChat() {
 
               {/* Footer Input */}
               <form onSubmit={handleChatSubmit} className="p-3 border-t border-neutral-900 flex gap-2 bg-neutral-950/60 items-center">
-                <label className="p-2 border border-neutral-800 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-400 hover:text-white rounded-md cursor-pointer transition-colors relative shrink-0 flex items-center justify-center" title="Upload media">
+                <label className="p-2 border border-neutral-800 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-400 hover:text-white rounded-md cursor-pointer transition-colors relative shrink-0 flex items-center justify-center" title="Upload file">
                   <input
                     type="file"
                     accept="image/*,video/*"
@@ -356,6 +356,22 @@ export default function FloatingChat() {
                     className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                   />
                   <Paperclip className="h-3.5 w-3.5" />
+                </label>
+
+                {/* Camera Capture Option */}
+                <label className="p-2 border border-neutral-800 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-400 hover:text-white rounded-md cursor-pointer transition-colors relative shrink-0 flex items-center justify-center" title="Capture from camera">
+                  <input
+                    type="file"
+                    accept="image/*,video/*"
+                    capture="environment"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files.length > 0) {
+                        setChatFile(e.target.files[0]);
+                      }
+                    }}
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                  />
+                  <Camera className="h-3.5 w-3.5" />
                 </label>
 
                 {/* Voice Input Microphone Button */}

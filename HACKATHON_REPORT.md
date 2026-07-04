@@ -44,10 +44,12 @@ A comprehensive catalog listing all registered shelters, their location coordina
 ### 5. Placed Adopters Log
 A dashboard section for shelter managers listing all adopters who successfully approved and adopted companions from their facility, detailing contact emails, phones, and addresses.
 
-### 6. Premium UI Branding & Watermarks
+### 6. Premium UI Branding, Watermarks & UX Additions
 * **Embosed Parallax Watermark**: The landing page hero section features a centered, viewport-fixed transparent line art of the custom cat-heart logo (`line-art-dark.png` / `line-art-light.png`). It remains locked to the center of the viewport with a faint `opacity-[0.06]`, letting webpage content scroll dynamically over it for a parallax feel.
 * **Dynamic Theme Logo-Swap**: Controls logo visibility automatically based on the document theme. It renders `/logo.png` (white background) on dark themes, and `/logo-dark.png` (black background with glowing lines) on light themes to guarantee high contrast.
 * **Crisp Tab Favicon**: Features an icon.png processed using a custom Python script that boosts contrast and programmatically darkens line art pixels 5x to ensure it looks solid black and extremely crisp in browser tabs.
+* **Direct Camera Capture Toggle**: Fully integrated split media upload dropzones (Choose File / Use Camera) and chatbot inputs across Adopter Dashboard, Behavior Hub, and Global Floating Chat. Mobile users can capture photo/video streams directly from their native device camera utilizing built-in HTML5 `capture="environment"` prompts.
+* **Post-Adoption Care Navigation**: Renamed the primary header link label to "Post-Adoption Care" to ensure users instantly recognize where to find real-time behavioral diagnostics.
 
 ---
 
