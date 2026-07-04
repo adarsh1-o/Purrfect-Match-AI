@@ -4,6 +4,7 @@ import { useState } from "react";
 import { uploadBehaviourMedia } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Video, RefreshCw, Smile, Heart, ClipboardCheck, Play, Camera } from "lucide-react";
+import CameraCaptureModal from "../components/CameraCaptureModal";
 
 export default function BehaviourAnalysisHub() {
   const [catName, setCatName] = useState("");
@@ -12,6 +13,7 @@ export default function BehaviourAnalysisHub() {
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [scanMessage, setScanMessage] = useState("Extracting media keyframes...");
   const [currentStep, setCurrentStep] = useState(0);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
 
   const scanningSteps = [
     "Opening media container and sampling frame sequences...",
@@ -120,15 +122,11 @@ export default function BehaviourAnalysisHub() {
                 </div>
 
                 {/* Camera capture */}
-                <div className="flex-1 border-2 border-dashed border-neutral-800 hover:border-red-500/40 rounded-xl p-5 text-center cursor-pointer transition-colors relative">
-                  <input
-                    type="file"
-                    required
-                    accept="image/*,video/*"
-                    capture="environment"
-                    onChange={handleFileChange}
-                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                  />
+                <button
+                  type="button"
+                  onClick={() => setIsCameraOpen(true)}
+                  className="flex-1 border-2 border-dashed border-neutral-800 hover:border-red-500/40 rounded-xl p-5 text-center cursor-pointer transition-colors relative flex flex-col justify-center items-center bg-transparent"
+                >
                   <div className="space-y-1.5">
                     <Camera className="h-6 w-6 text-neutral-500 mx-auto" />
                     <p className="text-xs text-neutral-400 font-semibold">
@@ -136,7 +134,7 @@ export default function BehaviourAnalysisHub() {
                     </p>
                     <p className="text-[8px] text-neutral-500">Take Photo/Video</p>
                   </div>
-                </div>
+                </button>
               </div>
 
               <button
@@ -255,6 +253,15 @@ export default function BehaviourAnalysisHub() {
           </AnimatePresence>
         </div>
       </div>
+      {/* Camera Capture Modal */}
+      <CameraCaptureModal
+        isOpen={isCameraOpen}
+        onClose={() => setIsCameraOpen(false)}
+        onCapture={(file) => {
+          setUploadFile(file);
+          setAnalysisResult(null);
+        }}
+      />
     </div>
   );
 }

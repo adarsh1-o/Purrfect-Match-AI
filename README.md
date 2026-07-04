@@ -75,7 +75,7 @@ Purrfect Match AI shifts the focus from **appearance to compatibility** and expa
   * **Animated Typing Indicators**: Custom glassmorphic bouncing cat-paw loading indicator.
   * **Theme Logo Swapping**: Dynamic high-contrast logo switching between light theme (`/logo-dark.png`) and dark theme (`/logo.png`).
   * **Parallax Watermark**: Centered, viewport-fixed borderless cat line art watermark on the landing page.
-  * **Direct Camera Capture Toggle**: Split media upload zones and chat controls allowing users to snap photos or record videos directly using native device cameras (using HTML5 `capture="environment"` prompts).
+  * **WebRTC Camera Capture Modal**: Split media upload zones and chat controls allowing users on desktops, laptops, and mobile devices to snap webcam photos directly in-page using live camera streams.
 
 ---
 

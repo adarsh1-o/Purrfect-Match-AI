@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { fetchDashboardData, uploadBehaviourMedia, sendChatQuery } from "@/lib/api";
 import { ShieldCheck, Video, LayoutDashboard, Sparkles, Smile, RefreshCw, ClipboardList, CheckCircle, Clock, Paperclip, Copy, Check, Share2, Mic, MicOff, Cat, Camera } from "lucide-react";
 import Link from "next/link";
+import CameraCaptureModal from "../components/CameraCaptureModal";
 
 export default function AdopterDashboard() {
   const [data, setData] = useState<any>(null);
@@ -15,6 +16,8 @@ export default function AdopterDashboard() {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [isChatCameraOpen, setIsChatCameraOpen] = useState(false);
+  const [isCareCameraOpen, setIsCareCameraOpen] = useState(false);
 
   // Chatbot states
   const [chatCatId, setChatCatId] = useState("");
@@ -379,14 +382,11 @@ export default function AdopterDashboard() {
                   </div>
 
                   {/* Camera capture */}
-                  <div className="flex-1 border-2 border-dashed border-neutral-800 hover:border-red-500/40 rounded-xl p-5 text-center cursor-pointer transition-colors relative">
-                    <input
-                      type="file"
-                      accept="image/*,video/*"
-                      capture="environment"
-                      onChange={handleFileChange}
-                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                    />
+                  <button
+                    type="button"
+                    onClick={() => setIsCareCameraOpen(true)}
+                    className="flex-1 border-2 border-dashed border-neutral-800 hover:border-red-500/40 rounded-xl p-5 text-center cursor-pointer transition-colors relative flex flex-col justify-center items-center bg-transparent"
+                  >
                     <div className="space-y-1.5">
                       <Camera className="h-6 w-6 text-neutral-500 mx-auto" />
                       <p className="text-xs text-neutral-400 font-semibold">
@@ -394,7 +394,7 @@ export default function AdopterDashboard() {
                       </p>
                       <p className="text-[8px] text-neutral-500">Take Photo/Video</p>
                     </div>
-                  </div>
+                  </button>
                 </div>
 
                 <button
@@ -613,20 +613,14 @@ export default function AdopterDashboard() {
               </label>
 
               {/* Chat Camera Option */}
-              <label className="p-2 border border-neutral-800 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-400 hover:text-white rounded-md cursor-pointer transition-colors relative shrink-0 flex items-center justify-center" title="Capture from camera">
-                <input
-                  type="file"
-                  accept="image/*,video/*"
-                  capture="environment"
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files.length > 0) {
-                      setChatFile(e.target.files[0]);
-                    }
-                  }}
-                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                />
+              <button
+                type="button"
+                onClick={() => setIsChatCameraOpen(true)}
+                className="p-2 border border-neutral-800 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-400 hover:text-white rounded-md cursor-pointer transition-colors shrink-0 flex items-center justify-center"
+                title="Capture from camera"
+              >
                 <Camera className="h-3.5 w-3.5" />
-              </label>
+              </button>
 
               {/* Voice Input Microphone Button */}
               <button
@@ -737,6 +731,17 @@ export default function AdopterDashboard() {
           </div>
         </div>
       )}
+    {/* Camera Capture Modals */}
+      <CameraCaptureModal
+        isOpen={isChatCameraOpen}
+        onClose={() => setIsChatCameraOpen(false)}
+        onCapture={(file) => setChatFile(file)}
+      />
+      <CameraCaptureModal
+        isOpen={isCareCameraOpen}
+        onClose={() => setIsCareCameraOpen(false)}
+        onCapture={(file) => setUploadFile(file)}
+      />
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Sparkles, Cat, X, Send, Paperclip, Camera, Minus, Maximize2, Minimize2, Copy, Check, Share2, Mic, MicOff } from "lucide-react";
 import { sendChatQuery } from "@/lib/api";
+import CameraCaptureModal from "./CameraCaptureModal";
 
 export default function FloatingChat() {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,6 +19,7 @@ export default function FloatingChat() {
   const [showPrompt, setShowPrompt] = useState(true);
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -359,20 +361,14 @@ export default function FloatingChat() {
                 </label>
 
                 {/* Camera Capture Option */}
-                <label className="p-2 border border-neutral-800 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-400 hover:text-white rounded-md cursor-pointer transition-colors relative shrink-0 flex items-center justify-center" title="Capture from camera">
-                  <input
-                    type="file"
-                    accept="image/*,video/*"
-                    capture="environment"
-                    onChange={(e) => {
-                      if (e.target.files && e.target.files.length > 0) {
-                        setChatFile(e.target.files[0]);
-                      }
-                    }}
-                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                  />
+                <button
+                  type="button"
+                  onClick={() => setIsCameraOpen(true)}
+                  className="p-2 border border-neutral-800 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-400 hover:text-white rounded-md cursor-pointer transition-colors shrink-0 flex items-center justify-center"
+                  title="Capture from camera"
+                >
                   <Camera className="h-3.5 w-3.5" />
-                </label>
+                </button>
 
                 {/* Voice Input Microphone Button */}
                 <button
@@ -450,6 +446,13 @@ export default function FloatingChat() {
         
         {isOpen && !isMinimized ? <X className="h-5 w-5" /> : <Cat className="h-5.5 w-5.5 animate-wiggle group-hover:scale-110" />}
       </button>
+
+      {/* Camera Capture Modal */}
+      <CameraCaptureModal
+        isOpen={isCameraOpen}
+        onClose={() => setIsCameraOpen(false)}
+        onCapture={(file) => setChatFile(file)}
+      />
     </div>
   );
 }
