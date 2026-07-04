@@ -36,6 +36,16 @@ export default function AuthPage() {
     }
   }, []);
 
+  const playMeowSound = () => {
+    try {
+      const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/87/87-preview.mp3");
+      audio.volume = 0.5;
+      audio.play().catch(e => console.log("Audio play blocked:", e));
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -46,6 +56,7 @@ export default function AuthPage() {
         // Sign in
         const user = await loginUser(email, password);
         setLoading(false);
+        playMeowSound();
         if (user.role === "shelter") {
           router.push("/shelter");
         } else {
@@ -59,6 +70,7 @@ export default function AuthPage() {
         // Log in immediately after successful signup
         const loggedUser = await loginUser(email, password);
         setLoading(false);
+        playMeowSound();
         if (loggedUser.role === "shelter") {
           router.push("/shelter");
         } else {

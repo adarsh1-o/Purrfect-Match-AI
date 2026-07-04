@@ -11,6 +11,44 @@ export default function MatchResults() {
   const [matches, setMatches] = useState<any[]>([]);
   const [scanMessage, setScanMessage] = useState("Initializing intelligence matching algorithm...");
   const [currentStep, setCurrentStep] = useState(0);
+  const [hasSpoken, setHasSpoken] = useState(false);
+  const [userName, setUserName] = useState("there");
+
+  useEffect(() => {
+    const cachedName = localStorage.getItem("user_name");
+    if (cachedName) setUserName(cachedName);
+  }, []);
+
+  useEffect(() => {
+    if (!loading && matches.length > 0 && !hasSpoken) {
+      if (typeof window === "undefined" || !window.speechSynthesis) return;
+      
+      const bestMatch = matches[0];
+      const catName = bestMatch.cat?.name || "a cat";
+      const percentage = bestMatch.compatibility || "100";
+      
+      const greeting = `Hey ${userName}, ${catName} is a ${percentage}% match for you!`;
+      const utterance = new SpeechSynthesisUtterance(greeting);
+      
+      // Make it cute
+      utterance.pitch = 1.6; 
+      utterance.rate = 1.15;
+      
+      // Slight delay to ensure UI is visible before speaking
+      setTimeout(() => {
+        window.speechSynthesis.speak(utterance);
+      }, 300);
+      setHasSpoken(true);
+    }
+  }, [loading, matches, userName, hasSpoken]);
+
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
   // Scanning sequence messages
   const scanningSteps = [

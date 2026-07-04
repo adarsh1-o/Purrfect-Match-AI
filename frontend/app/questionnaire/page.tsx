@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { submitQuestionnaire } from "@/lib/api";
 import { motion } from "framer-motion";
@@ -9,6 +9,42 @@ import { ClipboardList, Heart, Sparkles, RefreshCw, ArrowRight } from "lucide-re
 export default function CompatibilityQuestionnaire() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
+  const [userName, setUserName] = useState("there");
+  const [hasSpoken, setHasSpoken] = useState(false);
+
+  useEffect(() => {
+    const cachedName = localStorage.getItem("user_name");
+    if (cachedName) setUserName(cachedName);
+  }, []);
+
+  useEffect(() => {
+    // Only speak once, and ensure voices are loaded
+    const speakGreeting = () => {
+      if (hasSpoken || typeof window === "undefined" || !window.speechSynthesis) return;
+      
+      const greeting = `Hey ${userName}! Welcome to the Adoption Compatibility Registry. Let's find your perfect feline companion!`;
+      const utterance = new SpeechSynthesisUtterance(greeting);
+      
+      // Make it cute
+      utterance.pitch = 1.6; 
+      utterance.rate = 1.15;
+      
+      window.speechSynthesis.speak(utterance);
+      setHasSpoken(true);
+    };
+
+    // Need a slight delay to allow voices to load on some browsers
+    const timer = setTimeout(speakGreeting, 600);
+    return () => clearTimeout(timer);
+  }, [userName, hasSpoken]);
+
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
   // Form States
   const [houseType, setHouseType] = useState("apartment");
