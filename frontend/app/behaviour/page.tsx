@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { uploadBehaviourMedia } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Video, RefreshCw, Smile, Heart, ClipboardCheck, Play, Camera } from "lucide-react";
+import { Sparkles, Video, RefreshCw, Smile, Heart, ClipboardCheck, Play, Camera, Volume2, VolumeX, Pause } from "lucide-react";
 import CameraCaptureModal from "../components/CameraCaptureModal";
 
 export default function BehaviourAnalysisHub() {
@@ -14,6 +14,63 @@ export default function BehaviourAnalysisHub() {
   const [scanMessage, setScanMessage] = useState("Extracting media keyframes...");
   const [currentStep, setCurrentStep] = useState(0);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isSpeechPaused, setIsSpeechPaused] = useState(false);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  // Stop speech synthesis on unmount
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  const handleSpeak = (text: string) => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+
+    if (isSpeaking) {
+      if (isSpeechPaused) {
+        window.speechSynthesis.resume();
+        setIsSpeechPaused(false);
+      } else {
+        window.speechSynthesis.pause();
+        setIsSpeechPaused(true);
+      }
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const cleanText = text
+      .replace(/[*#_`~-]/g, "")
+      .replace(/\[.*?\]\(.*?\)/g, "");
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utteranceRef.current = utterance;
+
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      setIsSpeechPaused(false);
+    };
+
+    utterance.onerror = () => {
+      setIsSpeaking(false);
+      setIsSpeechPaused(false);
+    };
+
+    setIsSpeaking(true);
+    setIsSpeechPaused(false);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const handleStopSpeech = () => {
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    setIsSpeaking(false);
+    setIsSpeechPaused(false);
+  };
 
   const scanningSteps = [
     "Opening media container and sampling frame sequences...",
@@ -56,6 +113,11 @@ export default function BehaviourAnalysisHub() {
       const result = await uploadBehaviourMedia(null, uploadFile);
       setAnalysisResult(result);
       setUploadFile(null);
+      
+      const speechText = `I detected a ${result.mood} mood. The inferred behavior is ${result.detected_behaviour}. ${result.analysis}`;
+      setTimeout(() => {
+        handleSpeak(speechText);
+      }, 50);
     } catch (err: any) {
       alert(err.message || "Failed to process behavioral analysis.");
     } finally {
@@ -211,9 +273,47 @@ export default function BehaviourAnalysisHub() {
                       Behavior Scan Results: <span className="text-red-400">{catName || "Your Companion"}</span>
                     </h3>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded bg-red-950/40 border border-red-900/40 text-[10px] font-bold text-red-400 uppercase font-mono">
-                    {analysisResult.mood}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleSpeak(`I detected a ${analysisResult.mood} mood. The inferred behavior is ${analysisResult.detected_behaviour}. ${analysisResult.analysis}`)}
+                      className="flex items-center gap-1 hover:text-white transition-colors cursor-pointer"
+                      title={isSpeaking ? (isSpeechPaused ? "Resume" : "Pause") : "Speak"}
+                    >
+                      {isSpeaking ? (
+                        isSpeechPaused ? (
+                          <>
+                            <Play className="h-4 w-4 text-emerald-400" />
+                            <span className="text-xs text-emerald-400">Resume</span>
+                          </>
+                        ) : (
+                          <>
+                            <Pause className="h-4 w-4 text-red-400 animate-pulse" />
+                            <span className="text-xs text-red-400">Pause</span>
+                          </>
+                        )
+                      ) : (
+                        <>
+                          <Volume2 className="h-4 w-4 text-neutral-400 hover:text-white" />
+                          <span className="text-xs text-neutral-400 hover:text-white">Listen</span>
+                        </>
+                      )}
+                    </button>
+                    {isSpeaking && (
+                      <button
+                        type="button"
+                        onClick={handleStopSpeech}
+                        className="flex items-center gap-1 text-red-500 hover:text-red-400 transition-colors cursor-pointer"
+                        title="Stop speech"
+                      >
+                        <VolumeX className="h-4 w-4" />
+                        <span className="text-xs">Stop</span>
+                      </button>
+                    )}
+                    <span className="px-2.5 py-0.5 rounded bg-red-950/40 border border-red-900/40 text-[10px] font-bold text-red-400 uppercase font-mono">
+                      {analysisResult.mood}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="space-y-1">
