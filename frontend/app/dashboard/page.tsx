@@ -18,6 +18,7 @@ export default function AdopterDashboard() {
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [isChatCameraOpen, setIsChatCameraOpen] = useState(false);
   const [isCareCameraOpen, setIsCareCameraOpen] = useState(false);
+  const [voiceTranscript, setVoiceTranscript] = useState("");
 
   // Chatbot states
   const [chatCatId, setChatCatId] = useState("");
@@ -159,17 +160,30 @@ export default function AdopterDashboard() {
 
     try {
       const rec = new SpeechRecognition();
-      rec.continuous = false;
-      rec.interimResults = false;
+      rec.continuous = true;
+      rec.interimResults = true;
       rec.lang = "en-US";
       
       rec.onstart = () => {
         setIsRecording(true);
+        setVoiceTranscript("");
       };
 
       rec.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setChatInput((prev) => (prev ? prev + " " + transcript : transcript));
+        let interimTranscript = "";
+        let finalTranscript = "";
+        
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
+        }
+        
+        const currentText = finalTranscript || interimTranscript;
+        setVoiceTranscript(currentText);
+        setChatInput(currentText);
       };
 
       rec.onend = () => {
@@ -589,10 +603,21 @@ export default function AdopterDashboard() {
                 <button
                   type="button"
                   onClick={() => setChatFile(null)}
-                  className="text-red-550 hover:text-red-400 font-bold ml-1 cursor-pointer shrink-0"
+                  className="text-red-555 hover:text-red-400 font-bold ml-1 cursor-pointer shrink-0"
                 >
                   Remove
                 </button>
+              </div>
+            )}
+
+            {/* Live Voice Transcript Badge */}
+            {isRecording && (
+              <div className="p-2 mb-2 rounded bg-neutral-900 border border-neutral-850 text-[10px] text-neutral-300 flex items-center space-x-2 animate-fade-in">
+                <Mic className="h-3.5 w-3.5 text-red-500 animate-pulse shrink-0" />
+                <span className="font-semibold text-neutral-400">Live Transcript:</span>
+                <span className="italic truncate flex-grow text-neutral-200">
+                  {voiceTranscript || "Listening..."}
+                </span>
               </div>
             )}
 

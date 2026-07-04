@@ -71,7 +71,7 @@ Purrfect Match AI shifts the focus from **appearance to compatibility** and expa
 - **AI/ML**: OpenCV (headless frame extraction), Scikit-Learn (distance algorithms), google-generativeai (Gemini API)
 - **Deployment**: Multi-container Docker & Docker Compose configuration
 - **UX & Branding Features**:
-  * **Voice Input Speech-to-Text**: Hands-free voice interface for chatbot entries using Web Speech recognition.
+  * **Voice Input Speech-to-Text with Live Transcript**: Hands-free voice interface using Web Speech recognition with live visual transcription feedback inside a floating status bubble.
   * **Animated Typing Indicators**: Custom glassmorphic bouncing cat-paw loading indicator.
   * **Theme Logo Swapping**: Dynamic high-contrast logo switching between light theme (`/logo-dark.png`) and dark theme (`/logo.png`).
   * **Parallax Watermark**: Centered, viewport-fixed borderless cat line art watermark on the landing page.

@@ -49,6 +49,7 @@ A dashboard section for shelter managers listing all adopters who successfully a
 * **Dynamic Theme Logo-Swap**: Controls logo visibility automatically based on the document theme. It renders `/logo.png` (white background) on dark themes, and `/logo-dark.png` (black background with glowing lines) on light themes to guarantee high contrast.
 * **Crisp Tab Favicon**: Features an icon.png processed using a custom Python script that boosts contrast and programmatically darkens line art pixels 5x to ensure it looks solid black and extremely crisp in browser tabs.
 * **WebRTC Camera Capture Modal**: Fully integrated split media upload dropzones (Choose File / Use Camera) and chatbot inputs across Adopter Dashboard, Behavior Hub, and Global Floating Chat. Users on laptops, desktops, and mobile devices can capture webcam images directly in-page using a custom responsive modal backed by `navigator.mediaDevices.getUserMedia` video streams and canvas rendering fallbacks.
+* **Voice Speech-to-Text with Live Transcript**: Upgraded the speech recognition toggles inside the chatbot forms. As the user speaks, their voice is decoded in real-time and displayed in a glassmorphic transcript status bubble directly above the input bar, providing immediate, live visual feedback before final injection into the chat box.
 
 ---
 
