@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Sparkles, Cat, X, Send, Paperclip, Camera, Minus, Maximize2, Minimize2, Copy, Check, Share2, Mic, MicOff } from "lucide-react";
+import { Sparkles, Cat, X, Send, Paperclip, Camera, Minus, Maximize2, Minimize2, Copy, Check, Share2, Mic, MicOff, Volume2, VolumeX, Play, Pause } from "lucide-react";
 import { sendChatQuery } from "@/lib/api";
 import CameraCaptureModal from "./CameraCaptureModal";
 
@@ -21,9 +21,21 @@ export default function FloatingChat() {
   const [isRecording, setIsRecording] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [voiceTranscript, setVoiceTranscript] = useState("");
+  const [speakingMsgIdx, setSpeakingMsgIdx] = useState<number | null>(null);
+  const [isSpeechPaused, setIsSpeechPaused] = useState(false);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+
+  // Stop speech synthesis on unmount
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
   // Default featured cats matching seeded data ids or names
   const featuredCats = [
@@ -67,12 +79,65 @@ export default function FloatingChat() {
     try {
       // Pass the name context of the featured cat to the backend query
       const response = await sendChatQuery(chatCatId || null, userMsg, fileToUpload);
-      setChatMessages((prev) => [...prev, { sender: "ai", text: response.reply }]);
+      setChatMessages((prev) => {
+        const nextMsgs = [...prev, { sender: "ai", text: response.reply }];
+        setTimeout(() => {
+          handleSpeak(response.reply, nextMsgs.length - 1);
+        }, 50);
+        return nextMsgs;
+      });
     } catch (err: any) {
       setChatMessages((prev) => [...prev, { sender: "ai", text: `Sorry, I encountered an error: ${err.message}` }]);
     } finally {
       setChatLoading(false);
     }
+  };
+
+  const handleSpeak = (text: string, idx: number) => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+
+    if (speakingMsgIdx === idx) {
+      if (isSpeechPaused) {
+        window.speechSynthesis.resume();
+        setIsSpeechPaused(false);
+      } else {
+        window.speechSynthesis.pause();
+        setIsSpeechPaused(true);
+      }
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    // Strip markdown formatting from the text so it sounds natural
+    const cleanText = text
+      .replace(/[*#_`~-]/g, "")
+      .replace(/\[.*?\]\(.*?\)/g, "");
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utteranceRef.current = utterance;
+
+    utterance.onend = () => {
+      setSpeakingMsgIdx(null);
+      setIsSpeechPaused(false);
+    };
+
+    utterance.onerror = () => {
+      setSpeakingMsgIdx(null);
+      setIsSpeechPaused(false);
+    };
+
+    setSpeakingMsgIdx(idx);
+    setIsSpeechPaused(false);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const handleStopSpeech = () => {
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    setSpeakingMsgIdx(null);
+    setIsSpeechPaused(false);
   };
 
   const handleCopyMessage = async (text: string, idx: number) => {
@@ -310,6 +375,48 @@ export default function FloatingChat() {
                           </>
                         )}
                       </button>
+
+                      {msg.sender === "ai" && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleSpeak(msg.text, idx)}
+                            className="flex items-center gap-1 hover:text-white transition-colors cursor-pointer"
+                            title={speakingMsgIdx === idx ? (isSpeechPaused ? "Resume" : "Pause") : "Speak"}
+                          >
+                            {speakingMsgIdx === idx ? (
+                              isSpeechPaused ? (
+                                <>
+                                  <Play className="h-3 w-3 text-emerald-400" />
+                                  <span className="text-emerald-400">Resume</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Pause className="h-3 w-3 text-red-400 animate-pulse" />
+                                  <span className="text-red-400">Pause</span>
+                                </>
+                              )
+                            ) : (
+                              <>
+                                <Volume2 className="h-3 w-3" />
+                                <span>Speak</span>
+                              </>
+                            )}
+                          </button>
+
+                          {speakingMsgIdx === idx && (
+                            <button
+                              type="button"
+                              onClick={handleStopSpeech}
+                              className="flex items-center gap-1 text-red-500 hover:text-red-400 transition-colors cursor-pointer"
+                              title="Stop speech"
+                            >
+                              <VolumeX className="h-3 w-3" />
+                              <span>Stop</span>
+                            </button>
+                          )}
+                        </>
+                      )}
 
                       <button
                         type="button"

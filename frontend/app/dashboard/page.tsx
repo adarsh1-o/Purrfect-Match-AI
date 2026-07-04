@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { fetchDashboardData, uploadBehaviourMedia, sendChatQuery } from "@/lib/api";
-import { ShieldCheck, Video, LayoutDashboard, Sparkles, Smile, RefreshCw, ClipboardList, CheckCircle, Clock, Paperclip, Copy, Check, Share2, Mic, MicOff, Cat, Camera } from "lucide-react";
+import { ShieldCheck, Video, LayoutDashboard, Sparkles, Smile, RefreshCw, ClipboardList, CheckCircle, Clock, Paperclip, Copy, Check, Share2, Mic, MicOff, Cat, Camera, Volume2, VolumeX, Play, Pause } from "lucide-react";
 import Link from "next/link";
 import CameraCaptureModal from "../components/CameraCaptureModal";
 
@@ -19,6 +19,18 @@ export default function AdopterDashboard() {
   const [isChatCameraOpen, setIsChatCameraOpen] = useState(false);
   const [isCareCameraOpen, setIsCareCameraOpen] = useState(false);
   const [voiceTranscript, setVoiceTranscript] = useState("");
+  const [speakingMsgIdx, setSpeakingMsgIdx] = useState<number | null>(null);
+  const [isSpeechPaused, setIsSpeechPaused] = useState(false);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  // Stop speech synthesis on unmount
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
   // Chatbot states
   const [chatCatId, setChatCatId] = useState("");
@@ -90,12 +102,65 @@ export default function AdopterDashboard() {
 
     try {
       const response = await sendChatQuery(chatCatId || null, userMsg, fileToUpload);
-      setChatMessages((prev) => [...prev, { sender: "ai", text: response.reply }]);
+      setChatMessages((prev) => {
+        const nextMsgs = [...prev, { sender: "ai", text: response.reply }];
+        setTimeout(() => {
+          handleSpeak(response.reply, nextMsgs.length - 1);
+        }, 50);
+        return nextMsgs;
+      });
     } catch (err: any) {
       setChatMessages((prev) => [...prev, { sender: "ai", text: `Sorry, I encountered an error: ${err.message}` }]);
     } finally {
       setChatLoading(false);
     }
+  };
+
+  const handleSpeak = (text: string, idx: number) => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+
+    if (speakingMsgIdx === idx) {
+      if (isSpeechPaused) {
+        window.speechSynthesis.resume();
+        setIsSpeechPaused(false);
+      } else {
+        window.speechSynthesis.pause();
+        setIsSpeechPaused(true);
+      }
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    // Strip markdown formatting from the text so it sounds natural
+    const cleanText = text
+      .replace(/[*#_`~-]/g, "")
+      .replace(/\[.*?\]\(.*?\)/g, "");
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utteranceRef.current = utterance;
+
+    utterance.onend = () => {
+      setSpeakingMsgIdx(null);
+      setIsSpeechPaused(false);
+    };
+
+    utterance.onerror = () => {
+      setSpeakingMsgIdx(null);
+      setIsSpeechPaused(false);
+    };
+
+    setSpeakingMsgIdx(idx);
+    setIsSpeechPaused(false);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const handleStopSpeech = () => {
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    setSpeakingMsgIdx(null);
+    setIsSpeechPaused(false);
   };
 
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
@@ -562,6 +627,48 @@ export default function AdopterDashboard() {
                         </>
                       )}
                     </button>
+
+                    {msg.sender === "ai" && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => handleSpeak(msg.text, idx)}
+                          className="flex items-center gap-1 hover:text-white transition-colors cursor-pointer"
+                          title={speakingMsgIdx === idx ? (isSpeechPaused ? "Resume" : "Pause") : "Speak"}
+                        >
+                          {speakingMsgIdx === idx ? (
+                            isSpeechPaused ? (
+                              <>
+                                <Play className="h-3 w-3 text-emerald-400" />
+                                <span className="text-emerald-400">Resume</span>
+                              </>
+                            ) : (
+                              <>
+                                <Pause className="h-3 w-3 text-red-400 animate-pulse" />
+                                <span className="text-red-400">Pause</span>
+                              </>
+                            )
+                          ) : (
+                            <>
+                              <Volume2 className="h-3 w-3" />
+                              <span>Speak</span>
+                            </>
+                          )}
+                        </button>
+
+                        {speakingMsgIdx === idx && (
+                          <button
+                            type="button"
+                            onClick={handleStopSpeech}
+                            className="flex items-center gap-1 text-red-500 hover:text-red-400 transition-colors cursor-pointer"
+                            title="Stop speech"
+                          >
+                            <VolumeX className="h-3 w-3" />
+                            <span>Stop</span>
+                          </button>
+                        )}
+                      </>
+                    )}
 
                     <button
                       type="button"
